@@ -1,0 +1,31 @@
+[package]
+name = "ezinput"
+version = "0.1.0"
+edition = "2021"
+exclude = [".vscode/**"]
+description = "Easier joystick, mouse and keyboard input handling in Bevy"
+license = "MIT"
+repository = "https://github.com/existentially/ezinput"
+readme = "README.md"
+keywords = ["bevy", "input"]
+
+[workspace]
+resolver = "2"
+members = ["./", "macros"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "ezinput"
+path = "src/lib.rs"
+
+[dependencies]
+bevy = { version = "0.6", features = ["serialize"], default-features = false }
+serde = { version = "1", features = ["derive"] }
+strum_macros = "0.23"
+strum = { version = "0.23", features = ["derive"] }
+ezinput_macros = { path = "macros" }
+
+[[example]]
+name = "enumerated"
+path = "examples/enumerated.rs"
