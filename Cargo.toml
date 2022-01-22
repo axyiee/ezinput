@@ -24,7 +24,7 @@ bevy = { version = "0.6", features = ["serialize"], default-features = false }
 serde = { version = "1", features = ["derive"] }
 strum_macros = "0.23"
 strum = { version = "0.23", features = ["derive"] }
-ezinput_macros = { path = "macros" }
+ezinput_macros = { path = "macros", version = "0.1" }
 
 [[example]]
 name = "enumerated"
