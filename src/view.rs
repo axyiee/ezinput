@@ -23,6 +23,7 @@ where
     pub bindings: HashMap<Keys, ActionBinding<Keys>>,
     pub key_receiver_states: HashMap<BindingInputReceiver, PressState>,
     pub axis_receiver_states: HashMap<BindingInputReceiver, AxisState>,
+    pub receiver_default_axis_values: HashMap<BindingInputReceiver, f32>,
 }
 
 impl<Keys> InputView<Keys>
@@ -35,12 +36,26 @@ where
             bindings: HashMap::new(),
             key_receiver_states: HashMap::new(),
             axis_receiver_states: HashMap::new(),
+            receiver_default_axis_values: HashMap::new(),
         }
     }
 
     pub fn add_binding(&mut self, key: Keys, binding: &ActionBinding<Keys>) -> &mut Self {
         self.bindings.insert(key, binding.clone());
         self
+    }
+
+    pub fn add_receiver_default_axis_values(
+        &mut self,
+        receiver: BindingInputReceiver,
+        value: f32,
+    ) -> &mut Self {
+        self.receiver_default_axis_values.insert(receiver, value);
+        self
+    }
+
+    pub fn get_receiver_default_axis_value(&self, receiver: BindingInputReceiver) -> f32 {
+        self.receiver_default_axis_values.get(&receiver).unwrap_or(&1.).clone()
     }
 
     pub fn set_key_receiver_state(&mut self, key: BindingInputReceiver, state: PressState) {

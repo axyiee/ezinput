@@ -21,7 +21,7 @@ impl EZInputKeyboardService {
         view.set_axis_value(
             BindingInputReceiver::KeyboardKey(key),
             match state {
-                PressState::Pressed | PressState::JustPressed => 1.,
+                PressState::Pressed | PressState::JustPressed => view.get_receiver_default_axis_value(BindingInputReceiver::KeyboardKey(key)),
                 PressState::Released => 0.,
             },
             state,

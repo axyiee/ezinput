@@ -104,7 +104,7 @@ impl EZInputMouseService {
         view.set_axis_value(
             BindingInputReceiver::MouseButton(button),
             match state {
-                PressState::Pressed | PressState::JustPressed => 1.,
+                PressState::Pressed | PressState::JustPressed => view.get_receiver_default_axis_value(BindingInputReceiver::MouseButton(button)),
                 PressState::Released => 0.,
             },
             state,
