@@ -1,7 +1,6 @@
 pub mod binding;
 pub mod common;
 pub mod gamepad;
-pub mod id;
 pub mod keyboard;
 pub mod mouse;
 pub mod plugin;

@@ -25,6 +25,7 @@ impl EZInputGamepadService {
         view.set_key_receiver_state(BindingInputReceiver::GamepadButton(button), state);
         view.set_axis_value(BindingInputReceiver::GamepadButton(button), duration, state);
     }
+
     pub fn set_gamepad_axis_state<Keys>(
         &mut self,
         view: &mut InputView<Keys>,
@@ -59,6 +60,7 @@ pub(crate) fn gamepad_input_system<Keys>(
                         PressState::JustPressed
                     };
                     svc.set_gamepad_button_state::<Keys>(view.as_mut(), kind, state, duration);
+                    break;
                 }
             }
             GamepadEventType::AxisChanged(kind, value) => {
@@ -72,6 +74,7 @@ pub(crate) fn gamepad_input_system<Keys>(
                         PressState::JustPressed
                     };
                     svc.set_gamepad_axis_state::<Keys>(view.as_mut(), kind, state, value);
+                    break;
                 }
             }
             _ => {}

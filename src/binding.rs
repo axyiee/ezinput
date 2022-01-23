@@ -18,7 +18,6 @@ pub enum BindingInputReceiver {
     MouseAxis(MouseAxisType),
     GamepadAxis(GamepadAxisType),
     MouseAxisDelta(MouseAxisType),
-    GamepadAxisDelta(GamepadAxisType),
 }
 
 #[derive(PartialEq, Eq, Clone, Debug, Deserialize, Serialize, Default)]
