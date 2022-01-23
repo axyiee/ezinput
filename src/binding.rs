@@ -67,4 +67,13 @@ where
         self.input_receivers.insert(receivers);
         self
     }
+
+    pub fn apply_default_axis_to_all_receivers(&self, view: &mut InputView<InputKey>, value: f32) -> &Self {
+        for r in self.input_receivers.iter() {
+            for receiver in r.iter() {
+                view.add_receiver_default_axis_values(receiver.clone(), value);
+            }
+        }
+        self
+    }
 }
