@@ -1,6 +1,6 @@
 [package]
 name = "ezinput"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 exclude = [".vscode/**"]
 description = "Easier joystick, mouse and keyboard input handling in Bevy"
@@ -21,7 +21,7 @@ name = "ezinput"
 path = "src/lib.rs"
 
 [dependencies]
-bevy = { version = "0.6", features = ["serialize"], default-features = true }
+bevy = { version = "0.6", features = ["serialize"], default-features = false }
 serde = { version = "1", features = ["derive"] }
 strum_macros = "0.23"
 strum = { version = "0.23", features = ["derive"] }
