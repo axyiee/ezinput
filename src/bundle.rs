@@ -1,3 +1,5 @@
+//! Utility for automatically inserting a type view into a Bevy entity.
+
 use bevy::prelude::Bundle;
 
 use crate::prelude::*;

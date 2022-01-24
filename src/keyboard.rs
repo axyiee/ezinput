@@ -1,6 +1,8 @@
+//! Full keyboard support for EZInput.
 use crate::prelude::*;
 use bevy::{input::keyboard::KeyboardInput, prelude::*};
 
+/// Service responsible for allowing EZInput to handle keyboard input for a specific entity.
 #[derive(PartialEq, Debug, Component, Clone, Copy, Default)]
 pub struct EZInputKeyboardService;
 

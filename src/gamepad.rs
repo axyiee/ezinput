@@ -1,3 +1,4 @@
+//! Full gamepad support for EZInput.
 use bevy::prelude::*;
 
 use crate::prelude::*;

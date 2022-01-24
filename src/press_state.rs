@@ -1,3 +1,4 @@
+//! The press state for a button or axis. Also useful methods for checking the elapsed time.
 use std::{time::{Instant, Duration}, ops::Add};
 
 use bevy::input::ElementState;

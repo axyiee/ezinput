@@ -1,9 +1,12 @@
+//! A view is a object where all input states are stored. It also has useful methods such checking
+//! if a key or axis for a [`BindingTypeView`] is pressed or released by proving the [`PressState`].
 use std::collections::HashMap;
 
 use bevy::prelude::Component;
 
 use crate::prelude::*;
 
+/// The currently accepted input sources for bindings and receivers.
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug, strum_macros::Display)]
 pub enum InputSource {
     Gamepad,
@@ -11,9 +14,12 @@ pub enum InputSource {
     Mouse,
 }
 
+/// The current axis state. In other words, the strength (how much the axis is moved) and press state.
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub struct AxisState(pub f32, pub PressState);
 
+/// A view is a object where all input states are stored. It also has useful methods such checking
+/// if a key or axis for a [`BindingTypeView`] is pressed or released by proving the [`PressState`].
 #[derive(PartialEq, Clone, Debug, Component, Default)]
 pub struct InputView<Keys>
 where
@@ -30,6 +36,7 @@ impl<Keys> InputView<Keys>
 where
     Keys: BindingTypeView,
 {
+    /// Create an empty input view.
     pub fn empty() -> Self {
         Self {
             last_input_source: None,
@@ -40,11 +47,13 @@ where
         }
     }
 
+    /// Insert a new binding into the storage.
     pub fn add_binding(&mut self, key: Keys, binding: &ActionBinding<Keys>) -> &mut Self {
         self.bindings.insert(key, binding.clone());
         self
     }
 
+    /// Add a default axis value to a receiver.
     pub fn add_receiver_default_axis_values(
         &mut self,
         receiver: BindingInputReceiver,
@@ -54,6 +63,7 @@ where
         self
     }
 
+    /// Returns the default axis value for a receiver, or `1` if not found.
     pub fn get_receiver_default_axis_value(&self, receiver: BindingInputReceiver) -> f32 {
         self.receiver_default_axis_values
             .get(&receiver)
@@ -61,10 +71,12 @@ where
             .clone()
     }
 
+    /// Set the button state for a specific key receiver.
     pub fn set_key_receiver_state(&mut self, key: BindingInputReceiver, state: PressState) {
         self.key_receiver_states.insert(key, state);
     }
 
+    /// Set the axis state for a specific axis receiver.
     pub fn set_axis_value(
         &mut self,
         receiver: BindingInputReceiver,
@@ -75,6 +87,7 @@ where
             .insert(receiver, AxisState(value, element_state));
     }
 
+    /// Return the current press state for a specific binding matching with the given BindingTypeView.
     pub fn key(&self, kind: &Keys) -> PressState {
         let binding = self.bindings.get(kind);
         if let Some(binding) = binding {
@@ -96,6 +109,7 @@ where
         PressState::Released
     }
 
+    /// Return the current axis state for a specific binding matching with the given BindingTypeView.
     pub fn axis(&self, kind: &Keys) -> Vec<&AxisState> {
         let binding = self.bindings.get(kind);
         if let Some(binding) = binding {

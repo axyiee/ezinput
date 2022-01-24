@@ -1,3 +1,5 @@
+//! Mouse button, location and delta support for EZInput.
+
 use std::hash::Hash;
 
 use crate::prelude::*;
@@ -9,6 +11,7 @@ use bevy::{
 };
 use serde::{Deserialize, Serialize};
 
+/// All types of axis that can be moved in a mouse.
 #[derive(
     PartialEq, Eq, Hash, Clone, Copy, Debug, Deserialize, Serialize, strum_macros::Display,
 )]
@@ -18,6 +21,7 @@ pub enum MouseAxisType {
     Wheel,
 }
 
+/// Mouse button, location and delta support for EZInput.
 #[derive(PartialEq, Debug, Component, Clone, Default)]
 pub struct EZInputMouseService {
     pub mouse_position: Option<Vec2>,

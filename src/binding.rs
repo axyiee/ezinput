@@ -1,5 +1,5 @@
-/// This module contains [`BindingTypeView`] and [`ActionBinding`], in which they are used to
-/// implement the enumerated binding types and register the binding itself.
+//! This module contains [`BindingTypeView`] and [`ActionBinding`], in which they are used to
+//! implement the enumerated binding types and register the binding itself.
 use crate::prelude::*;
 use bevy::{prelude::*, utils::HashSet};
 use serde::{Deserialize, Serialize};

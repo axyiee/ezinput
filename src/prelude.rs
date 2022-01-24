@@ -1,6 +1,7 @@
+//! An public import for each module available for use.
+
 pub use crate::binding::*;
 pub use crate::bundle::*;
-pub use crate::common::*;
 pub use crate::gamepad::*;
 pub use crate::keyboard::*;
 pub use crate::mouse::*;

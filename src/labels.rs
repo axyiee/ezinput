@@ -1,3 +1,5 @@
+//! The label for each system used in the EZInput library.
+
 use bevy::prelude::SystemLabel;
 
 /// The label for each system used in the EZInput library.

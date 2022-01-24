@@ -1,3 +1,6 @@
+//! The plugin that need to be registered in order to start receiving and handling input given
+//! by the `bevy_input` API.
+
 use std::marker::PhantomData;
 
 use crate::prelude::*;
