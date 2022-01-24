@@ -1,13 +1,11 @@
 use crate::prelude::*;
-use bevy::{
-    input::keyboard::KeyboardInput,
-    prelude::*,
-};
+use bevy::{input::keyboard::KeyboardInput, prelude::*};
 
 #[derive(PartialEq, Debug, Component, Clone, Copy, Default)]
 pub struct EZInputKeyboardService;
 
 impl EZInputKeyboardService {
+    /// Change the current button and axis state for the given key for and set the last input source to Keyboard.
     pub fn set_keyboard_key_state<Keys>(
         &mut self,
         view: &mut InputView<Keys>,
@@ -21,7 +19,9 @@ impl EZInputKeyboardService {
         view.set_axis_value(
             BindingInputReceiver::KeyboardKey(key),
             match state {
-                PressState::Pressed | PressState::JustPressed => view.get_receiver_default_axis_value(BindingInputReceiver::KeyboardKey(key)),
+                PressState::Pressed {..} => {
+                    view.get_receiver_default_axis_value(BindingInputReceiver::KeyboardKey(key))
+                }
                 PressState::Released => 0.,
             },
             state,
@@ -29,6 +29,7 @@ impl EZInputKeyboardService {
     }
 }
 
+/// Input system responsible for handling keyboard input and setting the button state for each updated button and axis.
 pub(crate) fn keyboard_input_system<Keys: BindingTypeView>(
     mut query: Query<(&mut InputView<Keys>, &mut EZInputKeyboardService)>,
     mut rd: EventReader<KeyboardInput>,

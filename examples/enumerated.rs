@@ -21,7 +21,7 @@ pub struct InputBundle {
     input_bundle: InputHandlingBundle<EnumeratedBindings>,
     keyboard_input: EZInputKeyboardService,
     mouse_input: EZInputMouseService,
-    gamepad_input: EZInputGamepadService,
+    gamepad_input: EZInputGamepadService, // You may remove fields for input you don't want to support.
 }
 
 #[derive(Component, Default)]
@@ -59,35 +59,27 @@ fn main() {
 
 fn spawn_player(mut commands: Commands) {
     let mut view = InputView::empty();
+    use ezinput::prelude::BindingInputReceiver::*;
+    use EnumeratedBindings::*;
+    use EnumeratedMovementBindings::*;
+
     view.add_binding(
-        EnumeratedBindings::Movement(EnumeratedMovementBindings::Jump),
-        ActionBinding::from(EnumeratedBindings::Movement(
-            EnumeratedMovementBindings::Jump,
-        ))
-        .receiver(BindingInputReceiver::KeyboardKey(KeyCode::Space))
-        .receiver(BindingInputReceiver::GamepadButton(
-            GamepadButtonType::South,
-        )),
+        Movement(Jump),
+        ActionBinding::from(Movement(Jump))
+            .receiver(KeyboardKey(KeyCode::Space))
+            .receiver(GamepadButton(GamepadButtonType::South)),
     );
     view.add_binding(
-        EnumeratedBindings::Movement(EnumeratedMovementBindings::Left),
-        ActionBinding::from(EnumeratedBindings::Movement(
-            EnumeratedMovementBindings::Left,
-        ))
-        .receiver(BindingInputReceiver::KeyboardKey(KeyCode::A))
-        .receiver(BindingInputReceiver::GamepadAxis(
-            GamepadAxisType::LeftStickX,
-        )),
+        Movement(Left),
+        ActionBinding::from(Movement(Left))
+            .receiver(KeyboardKey(KeyCode::A))
+            .receiver(GamepadAxis(GamepadAxisType::LeftStickX)),
     );
     view.add_binding(
-        EnumeratedBindings::Movement(EnumeratedMovementBindings::Left),
-        ActionBinding::from(EnumeratedBindings::Movement(
-            EnumeratedMovementBindings::Right,
-        ))
-        .receiver(BindingInputReceiver::KeyboardKey(KeyCode::D))
-        .receiver(BindingInputReceiver::GamepadAxis(
-            GamepadAxisType::LeftStickX,
-        )),
+        Movement(Left),
+        ActionBinding::from(Movement(Right))
+            .receiver(KeyboardKey(KeyCode::D))
+            .receiver(GamepadAxis(GamepadAxisType::LeftStickX)),
     );
 
     commands.spawn_bundle(PlayerBundle::from_input_view(view));
@@ -95,19 +87,18 @@ fn spawn_player(mut commands: Commands) {
 
 fn check_input(query: Query<&InputView<EnumeratedBindings>, With<Player>>) {
     let view = query.single();
+    use EnumeratedBindings::*;
+    use EnumeratedMovementBindings::*;
 
-    if view.is_key_active(&EnumeratedBindings::Movement(
-        EnumeratedMovementBindings::Jump,
-    )) {
+    if view.key(&Movement(Jump)).just_pressed() {
         println!("=> Jump");
     }
+    
+    if let Some(elapsed) = view.key(&Movement(Jump)).elapsed() {
+        println!("=> Jumping for {:?}", elapsed);
+    }
 
-    if let Some(left_axis) = view
-        .get_axis_states(&EnumeratedBindings::Movement(
-            EnumeratedMovementBindings::Left,
-        ))
-        .first()
-    {
+    if let Some(left_axis) = view.axis(&Movement(Left)).first() {
         if left_axis.1 != PressState::Released && left_axis.0 < 0. {
             println!("=> Left: {:?}", left_axis.0);
         }

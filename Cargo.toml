@@ -21,7 +21,7 @@ name = "ezinput"
 path = "src/lib.rs"
 
 [dependencies]
-bevy = { version = "0.6", features = ["serialize"], default-features = false }
+bevy = { version = "0.6", features = ["serialize"], default-features = true }
 serde = { version = "1", features = ["derive"] }
 strum_macros = "0.23"
 strum = { version = "0.23", features = ["derive"] }

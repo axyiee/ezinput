@@ -27,6 +27,7 @@ pub struct EZInputMouseService {
 }
 
 impl EZInputMouseService {
+    /// Change the current mouse location and delta and set the last input source to Mouse.
     pub fn set_mouse_location<Keys>(
         &mut self,
         view: &mut InputView<Keys>,
@@ -35,25 +36,29 @@ impl EZInputMouseService {
     ) where
         Keys: BindingTypeView,
     {
+        let state = PressState::Pressed {
+            started_pressing_instant: None,
+        };
+
         view.set_axis_value(
             BindingInputReceiver::MouseAxis(MouseAxisType::X),
             position.x,
-            PressState::Pressed,
+            state,
         );
         view.set_axis_value(
             BindingInputReceiver::MouseAxis(MouseAxisType::Y),
             position.y,
-            PressState::Pressed,
+            state,
         );
         view.set_axis_value(
             BindingInputReceiver::MouseAxisDelta(MouseAxisType::X),
             delta.x,
-            PressState::Pressed,
+            state,
         );
         view.set_axis_value(
             BindingInputReceiver::MouseAxisDelta(MouseAxisType::Y),
             delta.y,
-            PressState::Pressed,
+            state,
         );
 
         self.mouse_delta = Some(delta);
@@ -62,6 +67,7 @@ impl EZInputMouseService {
         view.last_input_source = Some(InputSource::Mouse);
     }
 
+    /// Tick the mouse by stop moving the axis when released.
     pub fn tick_mouse<Keys>(&mut self, view: &mut InputView<Keys>)
     where
         Keys: BindingTypeView,
@@ -91,6 +97,7 @@ impl EZInputMouseService {
         self.mouse_delta = None;
     }
 
+    /// Set the mouse button state for the given button and set the last input source to Mouse.
     pub fn set_mouse_button_state<Keys>(
         &mut self,
         view: &mut InputView<Keys>,
@@ -104,7 +111,9 @@ impl EZInputMouseService {
         view.set_axis_value(
             BindingInputReceiver::MouseButton(button),
             match state {
-                PressState::Pressed | PressState::JustPressed => view.get_receiver_default_axis_value(BindingInputReceiver::MouseButton(button)),
+                PressState::Pressed {..} => {
+                    view.get_receiver_default_axis_value(BindingInputReceiver::MouseButton(button))
+                }
                 PressState::Released => 0.,
             },
             state,
@@ -112,6 +121,7 @@ impl EZInputMouseService {
     }
 }
 
+/// Input system responsible for handling mouse input and setting the button state for each updated button and axis.
 pub(crate) fn mouse_input_system<Keys>(
     mut query: Query<(&mut InputView<Keys>, &mut EZInputMouseService)>,
     mut cursor_rd: EventReader<CursorMoved>,

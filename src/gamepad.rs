@@ -2,16 +2,21 @@ use bevy::prelude::*;
 
 use crate::prelude::*;
 
+/// Service responsible for storing a specific gamepad for a entity,
+/// and allowing for handling gamepad input.
 #[derive(PartialEq, Debug, Component, Clone)]
 pub struct EZInputGamepadService(pub Gamepad);
 
+/// Implementation that creates a gamepad service with the first gamepad by default.
 impl Default for EZInputGamepadService {
     fn default() -> Self {
         Self(Gamepad(0))
     }
 }
 
+
 impl EZInputGamepadService {
+    /// Change the current button state for the given button and set the last input source to Gamepad.
     pub fn set_gamepad_button_state<Keys>(
         &mut self,
         view: &mut InputView<Keys>,
@@ -26,6 +31,7 @@ impl EZInputGamepadService {
         view.set_axis_value(BindingInputReceiver::GamepadButton(button), duration, state);
     }
 
+    /// Change the current axis state for the given axis and set the last input source to Gamepad.
     pub fn set_gamepad_axis_state<Keys>(
         &mut self,
         view: &mut InputView<Keys>,
@@ -41,6 +47,7 @@ impl EZInputGamepadService {
     }
 }
 
+/// Input system responsible for handling gamepad input and setting the button state for each updated button and axis.
 pub(crate) fn gamepad_input_system<Keys>(
     mut query: Query<(&mut InputView<Keys>, &mut EZInputGamepadService)>,
     mut rd: EventReader<GamepadEvent>,
@@ -57,7 +64,9 @@ pub(crate) fn gamepad_input_system<Keys>(
                     let state = if duration.abs() <= 0.1 {
                         PressState::Released
                     } else {
-                        PressState::JustPressed
+                        PressState::Pressed {
+                            started_pressing_instant: None,
+                        }
                     };
                     svc.set_gamepad_button_state::<Keys>(view.as_mut(), kind, state, duration);
                     break;
@@ -71,7 +80,9 @@ pub(crate) fn gamepad_input_system<Keys>(
                     let state = if value.abs() <= 0.1 {
                         PressState::Released
                     } else {
-                        PressState::JustPressed
+                        PressState::Pressed {
+                            started_pressing_instant: None,
+                        }
                     };
                     svc.set_gamepad_axis_state::<Keys>(view.as_mut(), kind, state, value);
                     break;

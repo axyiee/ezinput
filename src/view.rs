@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, slice::SliceIndex};
 
 use bevy::prelude::Component;
 
@@ -55,7 +55,10 @@ where
     }
 
     pub fn get_receiver_default_axis_value(&self, receiver: BindingInputReceiver) -> f32 {
-        self.receiver_default_axis_values.get(&receiver).unwrap_or(&1.).clone()
+        self.receiver_default_axis_values
+            .get(&receiver)
+            .unwrap_or(&1.)
+            .clone()
     }
 
     pub fn set_key_receiver_state(&mut self, key: BindingInputReceiver, state: PressState) {
@@ -72,24 +75,33 @@ where
             .insert(receiver, AxisState(value, element_state));
     }
 
-    pub fn is_key_active(&self, kind: &Keys) -> bool {
+    pub fn key(&self, kind: &Keys) -> PressState {
         let binding = self.bindings.get(kind);
         if let Some(binding) = binding {
-            binding.input_receivers.iter().any(|r| {
-                r.iter()
-                    .all(|b| self.key_receiver_states.get(b).unwrap_or(&PressState::Released) != &PressState::Released)
-            })
-        } else {
-            false
+            for r in binding.input_receivers.iter() {
+                let mut states = r.0.iter().map(|x| {
+                    self.key_receiver_states
+                        .get(x)
+                        .unwrap_or(&PressState::Released)
+                });
+                if states.len() < 1 && !states.all(|x| match x {
+                    &PressState::Released => false,
+                    _ => true
+                }) {
+                    continue;
+                }
+                return states.min().unwrap_or(&PressState::Released).clone();
+            }
         }
+        PressState::Released
     }
 
-    pub fn get_axis_states(&self, kind: &Keys) -> Vec<&AxisState> {
+    pub fn axis(&self, kind: &Keys) -> Vec<&AxisState> {
         let binding = self.bindings.get(kind);
         if let Some(binding) = binding {
             let mut vec = Vec::new();
             for r in binding.input_receivers.iter() {
-                for r in r.iter() {
+                for r in r.0.iter() {
                     vec.push(
                         self.axis_receiver_states
                             .get(r)
