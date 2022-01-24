@@ -7,6 +7,7 @@ Easier joystick, mouse and keyboard input handling in Bevy
 
 1. [Getting started](#getting-started)
 2. [Examples](https://github.com/HexaliteStudios/ezinput/tree/master/examples)
+3. [Documentation](https://docs.rs/ezinput/latest/ezinput/)
 
 ## Getting Started
 
