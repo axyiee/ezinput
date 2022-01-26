@@ -3,7 +3,7 @@
 use crate::prelude::*;
 use bevy::{prelude::*, utils::HashSet};
 use serde::{Deserialize, Serialize};
-use std::{fmt::Debug, hash::Hash};
+use std::{collections::HashMap, fmt::Debug, hash::Hash};
 
 /// A trait to be implemented for enumerated action keys.
 pub trait BindingTypeView:
@@ -34,13 +34,14 @@ impl From<Vec<BindingInputReceiver>> for InputReceivers {
 }
 
 /// The binding itself, and its associated receivers.
-#[derive(PartialEq, Eq, Clone, Debug, Deserialize, Serialize, Default)]
+#[derive(PartialEq, Clone, Debug, Deserialize, Serialize, Default)]
 pub struct ActionBinding<InputKey>
 where
     InputKey: BindingTypeView,
 {
     pub key: InputKey,
     pub input_receivers: HashSet<InputReceivers>,
+    pub default_axis_value: HashMap<BindingInputReceiver, f32>,
 }
 
 impl<InputKey> From<InputKey> for ActionBinding<InputKey>
@@ -52,6 +53,7 @@ where
         Self {
             key,
             input_receivers: vec![].into_iter().collect(),
+            default_axis_value: HashMap::default(),
         }
     }
 }
@@ -64,6 +66,7 @@ where
     pub fn new(key: InputKey, receivers: HashSet<InputReceivers>) -> Self {
         Self {
             key,
+            default_axis_value: HashMap::default(),
             input_receivers: receivers,
         }
     }
@@ -72,6 +75,7 @@ where
     pub fn new_from_vec(key: InputKey, receiver: Vec<Vec<BindingInputReceiver>>) -> Self {
         Self {
             key,
+            default_axis_value: HashMap::default(),
             input_receivers: receiver
                 .iter()
                 .map(|vec| InputReceivers::from(vec.clone()))
@@ -98,16 +102,15 @@ where
         self
     }
 
+    pub fn default_axis_value(&mut self, receiver: BindingInputReceiver, value: f32) -> &mut Self {
+        self.default_axis_value.insert(receiver, value);
+        self
+    }
+
     /// Apply the default axis value for each registered receiver for a specific view.
-    pub fn apply_default_axis_to_all_receivers(
-        &self,
-        view: &mut InputView<InputKey>,
-        value: f32,
-    ) -> &Self {
-        for r in self.input_receivers.iter() {
-            for receiver in r.0.iter() {
-                view.add_receiver_default_axis_values(receiver.clone(), value);
-            }
+    pub fn apply_default_axis_to_all_receivers(&self, view: &mut InputView<InputKey>) -> &Self {
+        for (receiver, value) in self.default_axis_value.iter() {
+            view.add_receiver_default_axis_values(receiver.clone(), value.clone());
         }
         self
     }

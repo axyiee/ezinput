@@ -1,6 +1,6 @@
 [package]
 name = "ezinput"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 exclude = [".vscode/**"]
 description = "Easier joystick, mouse and keyboard input handling in Bevy"
@@ -28,5 +28,9 @@ strum = { version = "0.23", features = ["derive"] }
 ezinput_macros = { path = "./macros", version = "0.2" }
 
 [[example]]
-name = "enumerated"
-path = "examples/enumerated.rs"
+name = "singleplayer"
+path = "examples/singleplayer.rs"
+
+[[example]]
+name = "multiplayer"
+path = "examples/multiplayer.rs"

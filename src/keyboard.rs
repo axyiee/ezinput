@@ -18,16 +18,14 @@ impl EZInputKeyboardService {
     {
         view.last_input_source = Some(InputSource::Keyboard);
         view.set_key_receiver_state(BindingInputReceiver::KeyboardKey(key), state);
-        view.set_axis_value(
-            BindingInputReceiver::KeyboardKey(key),
-            match state {
-                PressState::Pressed {..} => {
-                    view.get_receiver_default_axis_value(BindingInputReceiver::KeyboardKey(key))
-                }
-                PressState::Released => 0.,
-            },
-            state,
-        );
+
+        let value = match state {
+            PressState::Pressed { .. } => {
+                view.get_receiver_default_axis_value(BindingInputReceiver::KeyboardKey(key))
+            }
+            PressState::Released => 0.,
+        };
+        view.set_axis_value(BindingInputReceiver::KeyboardKey(key), value, state);
     }
 }
 

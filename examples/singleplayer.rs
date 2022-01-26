@@ -59,6 +59,7 @@ fn main() {
 
 fn spawn_player(mut commands: Commands) {
     let mut view = InputView::empty();
+
     use ezinput::prelude::BindingInputReceiver::*;
     use EnumeratedBindings::*;
     use EnumeratedMovementBindings::*;
@@ -73,10 +74,11 @@ fn spawn_player(mut commands: Commands) {
         Movement(Left),
         ActionBinding::from(Movement(Left))
             .receiver(KeyboardKey(KeyCode::A))
-            .receiver(GamepadAxis(GamepadAxisType::LeftStickX)),
+            .receiver(GamepadAxis(GamepadAxisType::LeftStickX))
+            .default_axis_value(KeyboardKey(KeyCode::A), -1.),
     );
     view.add_binding(
-        Movement(Left),
+        Movement(Right),
         ActionBinding::from(Movement(Right))
             .receiver(KeyboardKey(KeyCode::D))
             .receiver(GamepadAxis(GamepadAxisType::LeftStickX)),
@@ -93,7 +95,7 @@ fn check_input(query: Query<&InputView<EnumeratedBindings>, With<Player>>) {
     if view.key(&Movement(Jump)).just_pressed() {
         println!("=> Jump");
     }
-    
+
     if let Some(elapsed) = view.key(&Movement(Jump)).elapsed() {
         println!("=> Jumping for {:?}", elapsed);
     }

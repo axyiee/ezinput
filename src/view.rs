@@ -49,6 +49,7 @@ where
 
     /// Insert a new binding into the storage.
     pub fn add_binding(&mut self, key: Keys, binding: &ActionBinding<Keys>) -> &mut Self {
+        binding.apply_default_axis_to_all_receivers(self);
         self.bindings.insert(key, binding.clone());
         self
     }
@@ -91,41 +92,55 @@ where
     pub fn key(&self, kind: &Keys) -> PressState {
         let binding = self.bindings.get(kind);
         if let Some(binding) = binding {
-            for r in binding.input_receivers.iter() {
-                let mut states = r.0.iter().map(|x| {
-                    self.key_receiver_states
-                        .get(x)
-                        .unwrap_or(&PressState::Released)
-                });
-                if states.len() < 1 && !states.all(|x| match x {
-                    &PressState::Released => false,
-                    _ => true
-                }) {
-                    continue;
+            'initial: for r in binding.input_receivers.iter() {
+                let states: Vec<PressState> =
+                    r.0.iter()
+                        .map(|x| {
+                            self.key_receiver_states
+                                .get(x)
+                                .unwrap_or(&PressState::Released)
+                                .clone()
+                        })
+                        .collect();
+                if states.is_empty() {
+                    continue 'initial;
                 }
-                return states.min().unwrap_or(&PressState::Released).clone();
+                for state in states.iter() {
+                    if state.released() {
+                        continue 'initial;
+                    }
+                }
+                return states.iter().min().unwrap().clone();
             }
         }
         PressState::Released
     }
 
     /// Return the current axis state for a specific binding matching with the given BindingTypeView.
-    pub fn axis(&self, kind: &Keys) -> Vec<&AxisState> {
+    pub fn axis(&self, kind: &Keys) -> Vec<AxisState> {
         let binding = self.bindings.get(kind);
         if let Some(binding) = binding {
-            let mut vec = Vec::new();
-            for r in binding.input_receivers.iter() {
-                for r in r.0.iter() {
-                    vec.push(
-                        self.axis_receiver_states
-                            .get(r)
-                            .unwrap_or(&AxisState(0.0, PressState::Released)),
-                    );
+            'initial: for r in binding.input_receivers.iter() {
+                let states: Vec<AxisState> =
+                    r.0.iter()
+                        .map(|x| {
+                            self.axis_receiver_states
+                                .get(x)
+                                .unwrap_or(&AxisState(0., PressState::Released))
+                                .clone()
+                        })
+                        .collect();
+                if states.is_empty() {
+                    continue 'initial;
                 }
+                for state in states.iter() {
+                    if state.1.released() {
+                        continue 'initial;
+                    }
+                }
+                return states;
             }
-            vec
-        } else {
-            Vec::new()
         }
+        Vec::new()
     }
 }

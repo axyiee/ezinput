@@ -15,7 +15,6 @@ impl Default for EZInputGamepadService {
     }
 }
 
-
 impl EZInputGamepadService {
     /// Change the current button state for the given button and set the last input source to Gamepad.
     pub fn set_gamepad_button_state<Keys>(
