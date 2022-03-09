@@ -4,12 +4,12 @@ use ezinput_macros::*;
 use strum_macros::Display;
 
 #[derive(BindingTypeView, Debug, Copy, Clone, PartialEq, Eq, Hash, Display)]
-pub enum EnumeratedBindings {
-    Movement(EnumeratedMovementBindings),
+pub enum EnumeratedBinding {
+    Movement(EnumeratedMovementBinding),
 }
 
 #[derive(BindingTypeView, Debug, Copy, Clone, PartialEq, Eq, Hash, Display)]
-pub enum EnumeratedMovementBindings {
+pub enum EnumeratedMovementBinding {
     Jump,
     Left,
     Right,
@@ -18,7 +18,7 @@ pub enum EnumeratedMovementBindings {
 #[derive(Bundle)]
 pub struct InputBundle {
     #[bundle]
-    input_bundle: InputHandlingBundle<EnumeratedBindings>,
+    input_bundle: InputHandlingBundle<EnumeratedBinding>,
     keyboard_input: EZInputKeyboardService,
     mouse_input: EZInputMouseService,
     gamepad_input: EZInputGamepadService, // You may remove fields for input you don't want to support.
@@ -35,7 +35,7 @@ pub struct PlayerBundle {
 }
 
 impl PlayerBundle {
-    pub fn from_input_view(view: InputView<EnumeratedBindings>) -> Self {
+    pub fn from_input_view(view: InputView<EnumeratedBinding>) -> Self {
         Self {
             player: Player,
             input: InputBundle {
@@ -51,7 +51,7 @@ impl PlayerBundle {
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(EZInputPlugin::<EnumeratedBindings>::default())
+        .add_plugin(EZInputPlugin::<EnumeratedBinding>::default())
         .add_startup_system(spawn_player)
         .add_system(check_input)
         .run();
@@ -61,8 +61,8 @@ fn spawn_player(mut commands: Commands) {
     let mut view = InputView::empty();
 
     use ezinput::prelude::BindingInputReceiver::*;
-    use EnumeratedBindings::*;
-    use EnumeratedMovementBindings::*;
+    use EnumeratedBinding::*;
+    use EnumeratedMovementBinding::*;
 
     view.add_binding(
         Movement(Jump),
@@ -87,22 +87,22 @@ fn spawn_player(mut commands: Commands) {
     commands.spawn_bundle(PlayerBundle::from_input_view(view));
 }
 
-fn check_input(query: Query<&InputView<EnumeratedBindings>, With<Player>>) {
+fn check_input(query: Query<&InputView<EnumeratedBinding>, With<Player>>) {
     let view = query.single();
-    use EnumeratedBindings::*;
-    use EnumeratedMovementBindings::*;
+    use EnumeratedBinding::*;
+    use EnumeratedMovementBinding::*;
 
     if view.key(&Movement(Jump)).just_pressed() {
-        println!("=> Jump");
+        println!("{:?} => Jump", view.last_input_source);
     }
 
     if let Some(elapsed) = view.key(&Movement(Jump)).elapsed() {
-        println!("=> Jumping for {:?}", elapsed);
+        println!("{:?} => Jumping for {:?}", view.last_input_source, elapsed);
     }
 
     if let Some(left_axis) = view.axis(&Movement(Left)).first() {
         if left_axis.1 != PressState::Released && left_axis.0 < 0. {
-            println!("=> Left: {:?}", left_axis.0);
+            println!("{:?} => Left: {:?}", view.last_input_source, left_axis.0);
         }
     }
 }

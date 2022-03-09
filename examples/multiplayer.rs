@@ -6,12 +6,12 @@ use ezinput_macros::*;
 use strum_macros::Display;
 
 #[derive(BindingTypeView, Debug, Copy, Clone, PartialEq, Eq, Hash, Display)]
-pub enum EnumeratedBindings {
-    Movement(EnumeratedMovementBindings),
+pub enum EnumeratedBinding {
+    Movement(EnumeratedMovementBinding),
 }
 
 #[derive(BindingTypeView, Debug, Copy, Clone, PartialEq, Eq, Hash, Display)]
-pub enum EnumeratedMovementBindings {
+pub enum EnumeratedMovementBinding {
     Jump,
     Left,
     Right,
@@ -23,11 +23,11 @@ pub struct Player;
 pub struct PlayerBundle {
     player: Player,
     #[bundle]
-    input: InputHandlingBundle<EnumeratedBindings>,
+    input: InputHandlingBundle<EnumeratedBinding>,
 }
 
 impl PlayerBundle {
-    pub fn from_input_view(view: InputView<EnumeratedBindings>) -> Self {
+    pub fn from_input_view(view: InputView<EnumeratedBinding>) -> Self {
         Self {
             player: Player,
             input: InputHandlingBundle { view },
@@ -38,7 +38,7 @@ impl PlayerBundle {
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(EZInputPlugin::<EnumeratedBindings>::default())
+        .add_plugin(EZInputPlugin::<EnumeratedBinding>::default())
         .add_startup_system(spawn_players)
         .add_system(check_input)
         .run();
@@ -47,8 +47,8 @@ fn main() {
 fn spawn_players(mut commands: Commands) {
     let mut view = InputView::empty();
     use ezinput::prelude::BindingInputReceiver::*;
-    use EnumeratedBindings::*;
-    use EnumeratedMovementBindings::*;
+    use EnumeratedBinding::*;
+    use EnumeratedMovementBinding::*;
 
     view.add_binding(
         Movement(Jump),
@@ -84,9 +84,9 @@ fn spawn_players(mut commands: Commands) {
         .insert(EZInputGamepadService(gamepad));
 }
 
-fn check_input(query: Query<&InputView<EnumeratedBindings>, With<Player>>) {
-    use EnumeratedBindings::*;
-    use EnumeratedMovementBindings::*;
+fn check_input(query: Query<&InputView<EnumeratedBinding>, With<Player>>) {
+    use EnumeratedBinding::*;
+    use EnumeratedMovementBinding::*;
 
     for view in query.iter() {
         let player = match view.last_input_source.unwrap_or(InputSource::Keyboard) {

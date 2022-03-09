@@ -26,7 +26,7 @@ impl EZInputGamepadService {
     ) where
         Keys: BindingTypeView,
     {
-        view.last_input_source = Some(InputSource::Gamepad);
+        view.set_last_input_source(Some(GamepadInputSource));
         view.set_key_receiver_state(BindingInputReceiver::GamepadButton(button), state);
         view.set_axis_value(BindingInputReceiver::GamepadButton(button), duration, state);
     }
@@ -41,7 +41,7 @@ impl EZInputGamepadService {
     ) where
         Keys: BindingTypeView,
     {
-        view.last_input_source = Some(InputSource::Gamepad);
+        view.set_last_input_source(Some(GamepadInputSource));
         view.set_key_receiver_state(BindingInputReceiver::GamepadAxis(axis), state);
         view.set_axis_value(BindingInputReceiver::GamepadAxis(axis), duration, state);
     }

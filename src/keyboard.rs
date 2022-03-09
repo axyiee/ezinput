@@ -16,9 +16,8 @@ impl EZInputKeyboardService {
     ) where
         Keys: BindingTypeView,
     {
-        view.last_input_source = Some(InputSource::Keyboard);
+        view.set_last_input_source(Some(KeyboardInputSource));
         view.set_key_receiver_state(BindingInputReceiver::KeyboardKey(key), state);
-
         let value = match state {
             PressState::Pressed { .. } => {
                 view.get_receiver_default_axis_value(BindingInputReceiver::KeyboardKey(key))

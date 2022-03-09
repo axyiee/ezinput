@@ -6,26 +6,18 @@ use bevy::prelude::Component;
 
 use crate::prelude::*;
 
-/// The currently accepted input sources for bindings and receivers.
-#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug, strum_macros::Display)]
-pub enum InputSource {
-    Gamepad,
-    Keyboard,
-    Mouse,
-}
-
 /// The current axis state. In other words, the strength (how much the axis is moved) and press state.
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub struct AxisState(pub f32, pub PressState);
 
 /// A view is a object where all input states are stored. It also has useful methods such checking
 /// if a key or axis for a [`BindingTypeView`] is pressed or released by proving the [`PressState`].
-#[derive(PartialEq, Clone, Debug, Component, Default)]
+#[derive(Debug, Component, Default)]
 pub struct InputView<Keys>
 where
     Keys: BindingTypeView,
 {
-    pub last_input_source: Option<InputSource>,
+    pub last_input_source: Option<Box<dyn InputSource>>,
     pub bindings: HashMap<Keys, ActionBinding<Keys>>,
     pub key_receiver_states: HashMap<BindingInputReceiver, PressState>,
     pub axis_receiver_states: HashMap<BindingInputReceiver, AxisState>,
@@ -142,5 +134,17 @@ where
             }
         }
         Vec::new()
+    }
+
+    /// Change the value of the last active input source.
+    pub fn set_last_input_source<T>(&mut self, input_source: Option<T>)
+    where
+        T: InputSource,
+    {
+        self.last_input_source = if let Some(input_source) = input_source {
+            Some(Box::new(input_source))
+        } else {
+            None
+        }
     }
 }

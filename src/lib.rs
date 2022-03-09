@@ -1,9 +1,7 @@
-//! A simple rust library for the Bevy engine in which allow users to map input to actions.
+//! An input-agnostic library targeting complete support to axis and button handling for many input sources.
 //!
-//! The current implemented input sources are:
-//! - Keyboard;
-//! - Mouse;
-//! - Gamepad
+//! Input is relative; the library itself currently implements by default keyboard, mouse and controller, but
+//! you can add your own input sources
 //! 
 //! ## Features
 //! - Full joystick and keyboard support for both axis and buttons.
@@ -31,3 +29,4 @@ pub mod bundle;
 pub mod labels;
 pub mod press_state;
 pub mod tick;
+pub mod source;
