@@ -65,20 +65,17 @@ fn spawn_player(mut commands: Commands) {
     use EnumeratedMovementBinding::*;
 
     view.add_binding(
-        Movement(Jump),
         ActionBinding::from(Movement(Jump))
             .receiver(KeyboardKey(KeyCode::Space))
             .receiver(GamepadButton(GamepadButtonType::South)),
     );
     view.add_binding(
-        Movement(Left),
         ActionBinding::from(Movement(Left))
             .receiver(KeyboardKey(KeyCode::A))
             .receiver(GamepadAxis(GamepadAxisType::LeftStickX))
             .default_axis_value(KeyboardKey(KeyCode::A), -1.),
     );
     view.add_binding(
-        Movement(Right),
         ActionBinding::from(Movement(Right))
             .receiver(KeyboardKey(KeyCode::D))
             .receiver(GamepadAxis(GamepadAxisType::LeftStickX)),

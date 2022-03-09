@@ -68,7 +68,7 @@ impl EZInputMouseService {
         self.mouse_delta = Some(delta);
         self.mouse_position = Some(position);
         self.does_mouse_location_changed_this_tick = true;
-        view.set_last_input_source(Some(MouseInputSource));
+        view.set_last_input_source(Some(InputSource::Mouse));
     }
 
     /// Tick the mouse by stop moving the axis when released.
@@ -110,7 +110,7 @@ impl EZInputMouseService {
     ) where
         Keys: BindingTypeView,
     {
-        view.set_last_input_source(Some(MouseInputSource));
+        view.set_last_input_source(Some(InputSource::Mouse));
         view.set_key_receiver_state(BindingInputReceiver::MouseButton(button), state);
         view.set_axis_value(
             BindingInputReceiver::MouseButton(button),

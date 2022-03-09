@@ -6,12 +6,12 @@ use ezinput_macros::*;
 use strum_macros::Display;
 
 #[derive(BindingTypeView, Debug, Copy, Clone, PartialEq, Eq, Hash, Display)]
-pub enum EnumeratedBinding {
-    Movement(EnumeratedMovementBinding),
+pub enum EnumeratedBindings {
+    Movement(EnumeratedMovementBindings),
 }
 
 #[derive(BindingTypeView, Debug, Copy, Clone, PartialEq, Eq, Hash, Display)]
-pub enum EnumeratedMovementBinding {
+pub enum EnumeratedMovementBindings {
     Jump,
     Left,
     Right,
@@ -23,22 +23,22 @@ pub struct Player;
 pub struct PlayerBundle {
     player: Player,
     #[bundle]
-    input: InputHandlingBundle<EnumeratedBinding>,
+    input: InputHandlingBundle<EnumeratedBindings>,
 }
 
 impl PlayerBundle {
-    pub fn from_input_view(view: InputView<EnumeratedBinding>) -> Self {
+    pub fn from_input_view(view: InputView<EnumeratedBindings>) -> Self {
         Self {
             player: Player,
             input: InputHandlingBundle { view },
         }
-    }
+    } 
 }
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(EZInputPlugin::<EnumeratedBinding>::default())
+        .add_plugin(EZInputPlugin::<EnumeratedBindings>::default())
         .add_startup_system(spawn_players)
         .add_system(check_input)
         .run();
@@ -47,24 +47,21 @@ fn main() {
 fn spawn_players(mut commands: Commands) {
     let mut view = InputView::empty();
     use ezinput::prelude::BindingInputReceiver::*;
-    use EnumeratedBinding::*;
-    use EnumeratedMovementBinding::*;
+    use EnumeratedBindings::*;
+    use EnumeratedMovementBindings::*;
 
     view.add_binding(
-        Movement(Jump),
         ActionBinding::from(Movement(Jump))
             .receiver(KeyboardKey(KeyCode::Space))
             .receiver(GamepadButton(GamepadButtonType::South)),
     );
     view.add_binding(
-        Movement(Left),
         ActionBinding::from(Movement(Left))
             .receiver(KeyboardKey(KeyCode::A))
             .receiver(GamepadAxis(GamepadAxisType::LeftStickX))
             .default_axis_value(KeyboardKey(KeyCode::A), -1.),
     );
     view.add_binding(
-        Movement(Right),
         ActionBinding::from(Movement(Right))
             .receiver(KeyboardKey(KeyCode::D))
             .receiver(GamepadAxis(GamepadAxisType::LeftStickX)),
@@ -84,9 +81,9 @@ fn spawn_players(mut commands: Commands) {
         .insert(EZInputGamepadService(gamepad));
 }
 
-fn check_input(query: Query<&InputView<EnumeratedBinding>, With<Player>>) {
-    use EnumeratedBinding::*;
-    use EnumeratedMovementBinding::*;
+fn check_input(query: Query<&InputView<EnumeratedBindings>, With<Player>>) {
+    use EnumeratedBindings::*;
+    use EnumeratedMovementBindings::*;
 
     for view in query.iter() {
         let player = match view.last_input_source.unwrap_or(InputSource::Keyboard) {

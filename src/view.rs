@@ -6,18 +6,43 @@ use bevy::prelude::Component;
 
 use crate::prelude::*;
 
+/// Agnostic type for representing a input source (e.g. keyboard, mouse, gamepad).
+#[derive(PartialEq, Eq, Hash, Debug, Clone, Component, Copy)]
+pub enum InputSource {
+    Gamepad,
+    Keyboard,
+    Mouse,
+}
+
+impl InputSource {
+    /// Returns whether this input source is referent to a gamepad.
+    fn is_gamepad(&self) -> bool {
+        return self == &InputSource::Gamepad;
+    }
+
+    /// Returns whether this input source is referent to a keyboard.
+    fn is_keyboard(&self) -> bool{
+        return self == &InputSource::Keyboard;
+    }
+
+    /// Returns whether this input source is referent to a mouse.
+    fn is_mouse(&self) -> bool {
+        return self == &InputSource::Mouse;
+    }
+}
+
 /// The current axis state. In other words, the strength (how much the axis is moved) and press state.
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub struct AxisState(pub f32, pub PressState);
 
 /// A view is a object where all input states are stored. It also has useful methods such checking
 /// if a key or axis for a [`BindingTypeView`] is pressed or released by proving the [`PressState`].
-#[derive(Debug, Component, Default)]
+#[derive(PartialEq, Clone, Debug, Component, Default)]
 pub struct InputView<Keys>
 where
     Keys: BindingTypeView,
 {
-    pub last_input_source: Option<Box<dyn InputSource>>,
+    pub last_input_source: Option<InputSource>,
     pub bindings: HashMap<Keys, ActionBinding<Keys>>,
     pub key_receiver_states: HashMap<BindingInputReceiver, PressState>,
     pub axis_receiver_states: HashMap<BindingInputReceiver, AxisState>,
@@ -40,9 +65,9 @@ where
     }
 
     /// Insert a new binding into the storage.
-    pub fn add_binding(&mut self, key: Keys, binding: &ActionBinding<Keys>) -> &mut Self {
+    pub fn add_binding(&mut self, binding: &ActionBinding<Keys>) -> &mut Self {
         binding.apply_default_axis_to_all_receivers(self);
-        self.bindings.insert(key, binding.clone());
+        self.bindings.insert(binding.key, binding.clone());
         self
     }
 
@@ -137,14 +162,7 @@ where
     }
 
     /// Change the value of the last active input source.
-    pub fn set_last_input_source<T>(&mut self, input_source: Option<T>)
-    where
-        T: InputSource,
-    {
-        self.last_input_source = if let Some(input_source) = input_source {
-            Some(Box::new(input_source))
-        } else {
-            None
-        }
+    pub fn set_last_input_source(&mut self, input_source: Option<InputSource>) {
+        self.last_input_source = input_source;
     }
 }

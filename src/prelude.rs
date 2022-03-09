@@ -9,5 +9,4 @@ pub use crate::plugin::*;
 pub use crate::view::*;
 pub use crate::labels::*;
 pub use crate::press_state::*;
-pub use crate::source::*;
 pub(crate) use crate::tick::*;

@@ -1,7 +1,7 @@
 //! The press state for a button or axis. Also useful methods for checking the elapsed time.
-use std::{time::{Instant, Duration}, ops::Add};
-
 use bevy::input::ElementState;
+use bevy::utils::{Duration, Instant};
+use std::ops::Add;
 
 /// The press state for a button or axis.
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug, strum_macros::Display)]
@@ -29,32 +29,39 @@ impl PressState {
     /// Check if the current press state is pressed for more than a specific duration.
     pub fn pressed_for(&self, duration: Duration) -> bool {
         match self {
-            PressState::Pressed { started_pressing_instant } => {
-                started_pressing_instant.is_some() && started_pressing_instant.unwrap().elapsed() >= duration
+            PressState::Pressed {
+                started_pressing_instant,
+            } => {
+                started_pressing_instant.is_some()
+                    && started_pressing_instant.unwrap().elapsed() >= duration
             }
-            _ => false
+            _ => false,
         }
     }
 
     /// Check if the current press state was just pressed or not.
     pub fn just_pressed(&self) -> bool {
         match self {
-            PressState::Pressed { started_pressing_instant } => started_pressing_instant.is_none(),
-            _ => false
+            PressState::Pressed {
+                started_pressing_instant,
+            } => started_pressing_instant.is_none(),
+            _ => false,
         }
     }
 
     /// Return the elapsed time since the action was pressed
     pub fn elapsed(&self) -> Option<Duration> {
         match self {
-            PressState::Pressed { started_pressing_instant } => {
+            PressState::Pressed {
+                started_pressing_instant,
+            } => {
                 if let Some(started_pressing_instant) = started_pressing_instant {
                     Some(started_pressing_instant.elapsed())
                 } else {
                     None
                 }
             }
-            _ => None
+            _ => None,
         }
     }
 }
@@ -63,8 +70,12 @@ impl PressState {
 impl PartialOrd for PressState {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         match self {
-            PressState::Pressed { started_pressing_instant: a } => match other {
-                PressState::Pressed { started_pressing_instant: b } => Some(a.cmp(b)),
+            PressState::Pressed {
+                started_pressing_instant: a,
+            } => match other {
+                PressState::Pressed {
+                    started_pressing_instant: b,
+                } => Some(a.cmp(b)),
                 PressState::Released => Some(std::cmp::Ordering::Greater),
             },
             PressState::Released => match other {
@@ -78,8 +89,12 @@ impl PartialOrd for PressState {
 // Test to compare if `PartialOrd` is implemented correctly.
 #[test]
 fn partial_ord_press_state_test() {
-    let a = PressState::Pressed { started_pressing_instant: Some(Instant::now()) };
-    let b = PressState::Pressed { started_pressing_instant: Some(Instant::now().add(Duration::from_secs(342534))) };
+    let a = PressState::Pressed {
+        started_pressing_instant: Some(Instant::now()),
+    };
+    let b = PressState::Pressed {
+        started_pressing_instant: Some(Instant::now().add(Duration::from_secs(342534))),
+    };
     let value = a.cmp(&b);
     assert_eq!(value, std::cmp::Ordering::Less);
 }

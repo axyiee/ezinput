@@ -1,7 +1,6 @@
-use std::time::Instant;
-
 use crate::prelude::*;
 use bevy::prelude::*;
+use bevy::utils::Instant;
 
 /// Tick every input system to update the press state for the current time, letting the input view know the press
 /// state for the action.
