@@ -1,6 +1,6 @@
 [package]
 name = "ezinput"
-version = "0.2.3"
+version = "0.2.4"
 edition = "2021"
 exclude = [".vscode/**"]
 description = "Easier joystick, mouse and keyboard input handling in Bevy"
