@@ -1,7 +1,9 @@
 //! The press state for a button or axis. Also useful methods for checking the elapsed time.
+#[allow(unused_imports)]
+use std::ops::Add;
+
 use bevy::input::ElementState;
 use bevy::utils::{Duration, Instant};
-use std::ops::Add;
 
 /// The press state for a button or axis.
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug, strum_macros::Display)]
@@ -23,7 +25,7 @@ pub enum PressState {
 impl PressState {
     /// Check if the current press state is released or not.
     pub fn released(&self) -> bool {
-        return self == &PressState::Released;
+        self == &PressState::Released
     }
 
     /// Check if the current press state is pressed for more than a specific duration.
@@ -55,11 +57,7 @@ impl PressState {
             PressState::Pressed {
                 started_pressing_instant,
             } => {
-                if let Some(started_pressing_instant) = started_pressing_instant {
-                    Some(started_pressing_instant.elapsed())
-                } else {
-                    None
-                }
+                started_pressing_instant.as_ref().map(|started_pressing_instant| started_pressing_instant.elapsed())
             }
             _ => None,
         }
@@ -79,7 +77,7 @@ impl PartialOrd for PressState {
                 PressState::Released => Some(std::cmp::Ordering::Greater),
             },
             PressState::Released => match other {
-                PressState::Pressed { .. } => Some(std::cmp::Ordering::Greater),
+                PressState::Pressed { .. } => Some(std::cmp::Ordering::Less),
                 PressState::Released => Some(std::cmp::Ordering::Equal),
             },
         }
@@ -108,13 +106,14 @@ impl Ord for PressState {
 
 /// Implementation responsible for translating Bevy element states to EZInput press states.
 /// By default, the default pressing instant is the None.
-impl Into<PressState> for ElementState {
-    fn into(self) -> PressState {
-        match self {
+impl From<ElementState> for PressState {
+    fn from(value: ElementState) -> PressState {
+        match value {
             ElementState::Pressed => PressState::Pressed {
                 started_pressing_instant: None,
             },
             ElementState::Released => PressState::Released,
+    
         }
     }
 }

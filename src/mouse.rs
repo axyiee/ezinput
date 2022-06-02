@@ -45,22 +45,22 @@ impl EZInputMouseService {
         };
 
         view.set_axis_value(
-            BindingInputReceiver::MouseAxis(MouseAxisType::X),
+            InputReceiver::MouseAxis(MouseAxisType::X),
             position.x,
             state,
         );
         view.set_axis_value(
-            BindingInputReceiver::MouseAxis(MouseAxisType::Y),
+            InputReceiver::MouseAxis(MouseAxisType::Y),
             position.y,
             state,
         );
         view.set_axis_value(
-            BindingInputReceiver::MouseAxisDelta(MouseAxisType::X),
+            InputReceiver::MouseAxisDelta(MouseAxisType::X),
             delta.x,
             state,
         );
         view.set_axis_value(
-            BindingInputReceiver::MouseAxisDelta(MouseAxisType::Y),
+            InputReceiver::MouseAxisDelta(MouseAxisType::Y),
             delta.y,
             state,
         );
@@ -68,7 +68,7 @@ impl EZInputMouseService {
         self.mouse_delta = Some(delta);
         self.mouse_position = Some(position);
         self.does_mouse_location_changed_this_tick = true;
-        view.set_last_input_source(Some(InputSource::Mouse));
+        view.last_input_source = Some(InputSource::Mouse);
     }
 
     /// Tick the mouse by stop moving the axis when released.
@@ -77,22 +77,22 @@ impl EZInputMouseService {
         Keys: BindingTypeView,
     {
         view.set_axis_value(
-            BindingInputReceiver::MouseAxis(MouseAxisType::X),
+            InputReceiver::MouseAxis(MouseAxisType::X),
             0.,
             PressState::Released,
         );
         view.set_axis_value(
-            BindingInputReceiver::MouseAxis(MouseAxisType::Y),
+            InputReceiver::MouseAxis(MouseAxisType::Y),
             0.,
             PressState::Released,
         );
         view.set_axis_value(
-            BindingInputReceiver::MouseAxisDelta(MouseAxisType::X),
+            InputReceiver::MouseAxisDelta(MouseAxisType::X),
             0.,
             PressState::Released,
         );
         view.set_axis_value(
-            BindingInputReceiver::MouseAxisDelta(MouseAxisType::Y),
+            InputReceiver::MouseAxisDelta(MouseAxisType::Y),
             0.,
             PressState::Released,
         );
@@ -110,13 +110,13 @@ impl EZInputMouseService {
     ) where
         Keys: BindingTypeView,
     {
-        view.set_last_input_source(Some(InputSource::Mouse));
-        view.set_key_receiver_state(BindingInputReceiver::MouseButton(button), state);
+        view.last_input_source = Some(InputSource::Mouse);
+        view.set_key_receiver_state(InputReceiver::MouseButton(button), state);
         view.set_axis_value(
-            BindingInputReceiver::MouseButton(button),
+            InputReceiver::MouseButton(button),
             match state {
-                PressState::Pressed {..} => {
-                    view.get_receiver_default_axis_value(BindingInputReceiver::MouseButton(button))
+                PressState::Pressed { .. } => {
+                    view.get_receiver_default_axis_value(InputReceiver::MouseButton(button))
                 }
                 PressState::Released => 0.,
             },

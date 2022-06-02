@@ -1,107 +1,101 @@
 //! Keyboard assigned for player 1, and controller assigned for player 2
 
-use bevy::prelude::*;
-use ezinput::prelude::*;
-use ezinput_macros::*;
-use strum_macros::Display;
+use bevy::{
+    prelude::{App, Bundle, Commands, Component, DefaultPlugins, Query, With},
+};
+use ezinput::prelude::{InputReceiver::*, *};
 
-#[derive(BindingTypeView, Debug, Copy, Clone, PartialEq, Eq, Hash, Display)]
-pub enum EnumeratedBindings {
-    Movement(EnumeratedMovementBindings),
+input! {
+    EnumeratedBinding {
+        Movement<EnumeratedMovementBinding> {
+            Vertical = [KeyboardKey(KeyCode::W), KeyboardKey(KeyCode::S) => -1., GamepadAxis(GamepadAxisType::LeftStickY)],
+            Horizontal = [KeyboardKey(KeyCode::A) => -1. /* default axis value */, KeyboardKey(KeyCode::D), GamepadAxis(GamepadAxisType::LeftStickX)],
+        }
+    }
 }
 
-#[derive(BindingTypeView, Debug, Copy, Clone, PartialEq, Eq, Hash, Display)]
-pub enum EnumeratedMovementBindings {
-    Jump,
-    Left,
-    Right,
-}
+type EnumeratedInputView = InputView<EnumeratedBinding>;
+
 #[derive(Component, Default)]
 pub struct Player;
 
+#[derive(Component, Default)]
+pub struct Name(String);
+
 #[derive(Bundle)]
 pub struct PlayerBundle {
-    player: Player,
-    #[bundle]
-    input: InputHandlingBundle<EnumeratedBindings>,
+    marker: Player,
+    name: Name,
 }
 
 impl PlayerBundle {
-    pub fn from_input_view(view: InputView<EnumeratedBindings>) -> Self {
+    pub fn new(name: &str) -> Self {
         Self {
-            player: Player,
-            input: InputHandlingBundle { view },
+            marker: Player,
+            name: Name(String::from(name)),
         }
-    } 
+    }
+    pub fn one(commands: &mut Commands) {
+        let mut view = EnumeratedBinding::view();
+        view.clear_from_specific_source(InputSource::Gamepad);
+        commands
+            .spawn_bundle(Self::new("Player 1"))
+            .insert(view)
+            .insert(EZInputKeyboardService);
+    }
+    pub fn two(commands: &mut Commands) {
+        let mut view = EnumeratedBinding::view();
+        view.clear_from_specific_source(InputSource::Keyboard);
+        commands
+            .spawn_bundle(Self::new("Player 2"))
+            .insert(view)
+            .insert(EZInputGamepadService::default());
+    }
 }
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugin(EZInputPlugin::<EnumeratedBindings>::default())
+        .add_plugin(EZInputPlugin::<EnumeratedBinding>::default())
         .add_startup_system(spawn_players)
         .add_system(check_input)
         .run();
 }
 
 fn spawn_players(mut commands: Commands) {
-    let mut view = InputView::empty();
-    use ezinput::prelude::BindingInputReceiver::*;
-    use EnumeratedBindings::*;
-    use EnumeratedMovementBindings::*;
-
-    view.add_binding(
-        ActionBinding::from(Movement(Jump))
-            .receiver(KeyboardKey(KeyCode::Space))
-            .receiver(GamepadButton(GamepadButtonType::South)),
-    );
-    view.add_binding(
-        ActionBinding::from(Movement(Left))
-            .receiver(KeyboardKey(KeyCode::A))
-            .receiver(GamepadAxis(GamepadAxisType::LeftStickX))
-            .default_axis_value(KeyboardKey(KeyCode::A), -1.),
-    );
-    view.add_binding(
-        ActionBinding::from(Movement(Right))
-            .receiver(KeyboardKey(KeyCode::D))
-            .receiver(GamepadAxis(GamepadAxisType::LeftStickX)),
-    );
-
-    commands
-        .spawn()
-        .insert_bundle(PlayerBundle::from_input_view(view.clone()))
-        .insert(EZInputKeyboardService);
-
-    // There is better ways for detecting a controller, but this is just an example
-    // So we will get the first controller.
-    let gamepad = Gamepad(0);
-    commands
-        .spawn()
-        .insert_bundle(PlayerBundle::from_input_view(view.clone()))
-        .insert(EZInputGamepadService(gamepad));
+    PlayerBundle::one(&mut commands);
+    PlayerBundle::two(&mut commands);
 }
 
-fn check_input(query: Query<&InputView<EnumeratedBindings>, With<Player>>) {
-    use EnumeratedBindings::*;
-    use EnumeratedMovementBindings::*;
+fn check_input(query: Query<(&EnumeratedInputView, &Name), With<Player>>) {
+    use EnumeratedBinding::*;
+    use EnumeratedMovementBinding::*;
 
-    for view in query.iter() {
-        let player = match view.last_input_source.unwrap_or(InputSource::Keyboard) {
-            InputSource::Keyboard | InputSource::Mouse => 1,
-            InputSource::Gamepad => 2,
-        };
+    for (view, name) in query.iter() {
+        let name = &name.0;
 
-        if view.key(&Movement(Jump)).just_pressed() {
-            println!("[Player {}] => Jump", player);
+        if let Some(vertical) = view.axis(&Movement(Vertical)).first() {
+            let action = if vertical.0 < 0. { "Down" } else { "Up" };
+
+            if vertical.1.just_pressed() {
+                println!("({name}) {:?} => {action}", view.last_input_source);
+            }
+
+            if let Some(elapsed) = vertical.1.elapsed() {
+                println!(
+                    "({name}) {:?} => {action} for {:?}",
+                    view.last_input_source, elapsed
+                );
+            }
         }
 
-        if let Some(elapsed) = view.key(&Movement(Jump)).elapsed() {
-            println!("[Player {}] => Jumping for {:?}", player, elapsed);
-        }
-
-        if let Some(left_axis) = view.axis(&Movement(Left)).first() {
-            if left_axis.1 != PressState::Released && left_axis.0 < 0. {
-                println!("[Player {}] => Left: {:?}", player, left_axis.0);
+        if let Some(axis) = view.axis(&Movement(Horizontal)).first() {
+            if axis.1 != PressState::Released {
+                let action = if axis.0 < 0. { "Left" } else { "Right" };
+                println!(
+                    "({name}) {:?} => {action}: {:?}",
+                    view.last_input_source, axis.0
+                );
             }
         }
     }

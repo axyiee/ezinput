@@ -5,7 +5,7 @@ use crate::prelude::*;
 
 /// Service responsible for storing a specific gamepad for a entity,
 /// and allowing for handling gamepad input.
-#[derive(PartialEq, Debug, Component, Clone)]
+#[derive(PartialEq, Eq, Debug, Component, Clone)]
 pub struct EZInputGamepadService(pub Gamepad);
 
 /// Implementation that creates a gamepad service with the first gamepad by default.
@@ -26,9 +26,9 @@ impl EZInputGamepadService {
     ) where
         Keys: BindingTypeView,
     {
-        view.set_last_input_source(Some(InputSource::Gamepad));
-        view.set_key_receiver_state(BindingInputReceiver::GamepadButton(button), state);
-        view.set_axis_value(BindingInputReceiver::GamepadButton(button), duration, state);
+        view.last_input_source = Some(InputSource::Gamepad);
+        view.set_key_receiver_state(InputReceiver::GamepadButton(button), state);
+        view.set_axis_value(InputReceiver::GamepadButton(button), duration, state);
     }
 
     /// Change the current axis state for the given axis and set the last input source to Gamepad.
@@ -41,9 +41,9 @@ impl EZInputGamepadService {
     ) where
         Keys: BindingTypeView,
     {
-        view.set_last_input_source(Some(InputSource::Gamepad));
-        view.set_key_receiver_state(BindingInputReceiver::GamepadAxis(axis), state);
-        view.set_axis_value(BindingInputReceiver::GamepadAxis(axis), duration, state);
+        view.last_input_source = Some(InputSource::Gamepad);
+        view.set_key_receiver_state(InputReceiver::GamepadAxis(axis), state);
+        view.set_axis_value(InputReceiver::GamepadAxis(axis), duration, state);
     }
 }
 

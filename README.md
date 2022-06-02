@@ -18,13 +18,13 @@ Add the following to your `Cargo.toml` (replace `x.y.z` with the latest version)
 ```toml
 [dependencies]
 ezinput = "x.y.z"
-ezinput_macros = "x.y.z"
+strum_macros = "^0.24"
 ```
 
-[ci]: https://img.shields.io/github/workflow/status/existentially/ezinput/Rust%20CI%20with%20Cargo?logo=github&style=plastic
+[ci]: https://img.shields.io/github/workflow/status/existentially/ezinput/Rust%20CI%20with%20Cargo?logo=github&style=for-the-badge
 [github]: https://github.com/existentially/ezinput
-[lines_of_code]: https://img.shields.io/tokei/lines/github/existentially/ezinput?label=lines%20of%20code&logo=github&style=plastic
+[lines_of_code]: https://img.shields.io/tokei/lines/github/existentially/ezinput?label=lines%20of%20code&logo=github&style=for-the-badge
 [docs_rs]: https://docs.rs/ezinput/latest/ezinput/
-[docs_sio]: https://img.shields.io/docsrs/ezinput?style=plastic
+[docs_sio]: https://img.shields.io/docsrs/ezinput?style=for-the-badge
 [crates_io]: https://crates.io/crates/ezinput
-[version]: https://img.shields.io/crates/v/ezinput.svg?style=plastic
+[version]: https://img.shields.io/crates/v/ezinput.svg?style=for-the-badge

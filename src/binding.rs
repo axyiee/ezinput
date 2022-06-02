@@ -15,7 +15,7 @@ pub trait BindingTypeView:
 #[derive(
     PartialEq, Eq, Hash, Clone, Copy, Debug, Deserialize, Serialize, strum_macros::Display,
 )]
-pub enum BindingInputReceiver {
+pub enum InputReceiver {
     KeyboardKey(KeyCode),
     MouseButton(MouseButton),
     GamepadButton(GamepadButtonType),
@@ -24,11 +24,23 @@ pub enum BindingInputReceiver {
     MouseAxisDelta(MouseAxisType),
 }
 
-#[derive(PartialEq, Eq, Clone, Debug, Hash, Deserialize, Serialize, Default)]
-pub struct InputReceivers(pub Vec<BindingInputReceiver>);
+impl InputReceiver {
+    pub fn source(&self) -> InputSource {
+        match *self {
+            InputReceiver::KeyboardKey(_) => InputSource::Keyboard,
+            InputReceiver::GamepadButton(_) | InputReceiver::GamepadAxis(_) => InputSource::Gamepad,
+            InputReceiver::MouseButton(_)
+            | InputReceiver::MouseAxis(_)
+            | InputReceiver::MouseAxisDelta(_) => InputSource::Mouse,
+        }
+    }
+}
 
-impl From<Vec<BindingInputReceiver>> for InputReceivers {
-    fn from(input_receivers: Vec<BindingInputReceiver>) -> Self {
+#[derive(PartialEq, Eq, Clone, Debug, Hash, Deserialize, Serialize, Default)]
+pub struct InputReceivers(pub Vec<InputReceiver>);
+
+impl From<Vec<InputReceiver>> for InputReceivers {
+    fn from(input_receivers: Vec<InputReceiver>) -> Self {
         Self(input_receivers)
     }
 }
@@ -41,7 +53,7 @@ where
 {
     pub key: InputKey,
     pub input_receivers: HashSet<InputReceivers>,
-    pub default_axis_value: HashMap<BindingInputReceiver, f32>,
+    pub default_axis_value: HashMap<InputReceiver, f32>,
 }
 
 impl<InputKey> From<InputKey> for ActionBinding<InputKey>
@@ -52,7 +64,7 @@ where
     fn from(key: InputKey) -> Self {
         Self {
             key,
-            input_receivers: vec![].into_iter().collect(),
+            input_receivers: HashSet::default(),
             default_axis_value: HashMap::default(),
         }
     }
@@ -72,7 +84,7 @@ where
     }
 
     /// Create a new action binding from a key and a non-converted list of input receivers.
-    pub fn new_from_vec(key: InputKey, receiver: Vec<Vec<BindingInputReceiver>>) -> Self {
+    pub fn new_from_vec(key: InputKey, receiver: Vec<Vec<InputReceiver>>) -> Self {
         Self {
             key,
             default_axis_value: HashMap::default(),
@@ -90,19 +102,19 @@ where
     }
 
     /// Add a new input receiver to this action.
-    pub fn receiver(&mut self, receiver: BindingInputReceiver) -> &mut Self {
+    pub fn receiver(&mut self, receiver: InputReceiver) -> &mut Self {
         self.input_receivers
             .insert(InputReceivers::from(vec![receiver]));
         self
     }
 
     /// Add a collection of input receivers to this action.
-    pub fn receivers(&mut self, receivers: Vec<BindingInputReceiver>) -> &mut Self {
+    pub fn receivers(&mut self, receivers: Vec<InputReceiver>) -> &mut Self {
         self.input_receivers.insert(InputReceivers::from(receivers));
         self
     }
 
-    pub fn default_axis_value(&mut self, receiver: BindingInputReceiver, value: f32) -> &mut Self {
+    pub fn default_axis_value(&mut self, receiver: InputReceiver, value: f32) -> &mut Self {
         self.default_axis_value.insert(receiver, value);
         self
     }
@@ -110,7 +122,7 @@ where
     /// Apply the default axis value for each registered receiver for a specific view.
     pub fn apply_default_axis_to_all_receivers(&self, view: &mut InputView<InputKey>) -> &Self {
         for (receiver, value) in self.default_axis_value.iter() {
-            view.add_receiver_default_axis_values(receiver.clone(), value.clone());
+            view.add_receiver_default_axis_values(*receiver, *value);
         }
         self
     }

@@ -1,11 +1,11 @@
 [package]
 name = "ezinput"
-version = "0.2.4"
+version = "0.3.0"
 edition = "2021"
 exclude = [".vscode/**"]
 description = "Easier joystick, mouse and keyboard input handling in Bevy"
 license = "MIT"
-repository = "https://github.com/existentially/ezinput"
+repository = "https://github.com/eexsty/ezinput"
 readme = "README.md"
 keywords = ["bevy", "input"]
 publish = true
@@ -21,11 +21,11 @@ name = "ezinput"
 path = "src/lib.rs"
 
 [dependencies]
-bevy = { version = "0.7", features = ["serialize", "render", "x11", "bevy_gilrs"], default-features = false }
-serde = { version = "1", features = ["derive"] }
-strum_macros = "0.24"
-strum = { version = "0.24", features = ["derive"] }
-ezinput_macros = { path = "./macros", version = "0.2" }
+bevy = { version = "^0.7", features = ["serialize", "render", "x11", "bevy_gilrs"], default-features = false }
+serde = { version = "^1", features = ["derive"] }
+strum_macros = "^0.24"
+strum = { version = "^0.24", features = ["derive"] }
+ezinput_macros = { path = "./macros", version = "^0.2" }
 
 [[example]]
 name = "singleplayer"

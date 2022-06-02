@@ -2,7 +2,7 @@
 //! if a key or axis for a [`BindingTypeView`] is pressed or released by proving the [`PressState`].
 use std::collections::HashMap;
 
-use bevy::prelude::Component;
+use bevy::{prelude::Component, utils::hashbrown::HashSet};
 
 use crate::prelude::*;
 
@@ -17,19 +17,21 @@ pub enum InputSource {
 impl InputSource {
     /// Returns whether this input source is referent to a gamepad.
     fn is_gamepad(&self) -> bool {
-        return self == &InputSource::Gamepad;
+        self == &InputSource::Gamepad
     }
 
     /// Returns whether this input source is referent to a keyboard.
-    fn is_keyboard(&self) -> bool{
-        return self == &InputSource::Keyboard;
+    fn is_keyboard(&self) -> bool {
+        self == &InputSource::Keyboard
     }
 
     /// Returns whether this input source is referent to a mouse.
     fn is_mouse(&self) -> bool {
-        return self == &InputSource::Mouse;
+        self == &InputSource::Mouse
     }
 }
+
+pub type BindingInputReceiver = InputReceiver;
 
 /// The current axis state. In other words, the strength (how much the axis is moved) and press state.
 #[derive(PartialEq, Clone, Copy, Debug)]
@@ -44,9 +46,9 @@ where
 {
     pub last_input_source: Option<InputSource>,
     pub bindings: HashMap<Keys, ActionBinding<Keys>>,
-    pub key_receiver_states: HashMap<BindingInputReceiver, PressState>,
-    pub axis_receiver_states: HashMap<BindingInputReceiver, AxisState>,
-    pub receiver_default_axis_values: HashMap<BindingInputReceiver, f32>,
+    pub key_receiver_states: HashMap<InputReceiver, PressState>,
+    pub axis_receiver_states: HashMap<InputReceiver, AxisState>,
+    pub receiver_default_axis_values: HashMap<InputReceiver, f32>,
 }
 
 impl<Keys> InputView<Keys>
@@ -54,7 +56,7 @@ where
     Keys: BindingTypeView,
 {
     /// Create an empty input view.
-    pub fn empty() -> Self {
+    pub fn new() -> Self {
         Self {
             last_input_source: None,
             bindings: HashMap::new(),
@@ -74,7 +76,7 @@ where
     /// Add a default axis value to a receiver.
     pub fn add_receiver_default_axis_values(
         &mut self,
-        receiver: BindingInputReceiver,
+        receiver: InputReceiver,
         value: f32,
     ) -> &mut Self {
         self.receiver_default_axis_values.insert(receiver, value);
@@ -82,22 +84,21 @@ where
     }
 
     /// Returns the default axis value for a receiver, or `1` if not found.
-    pub fn get_receiver_default_axis_value(&self, receiver: BindingInputReceiver) -> f32 {
-        self.receiver_default_axis_values
+    pub fn get_receiver_default_axis_value(&self, receiver: InputReceiver) -> f32 {
+        *self.receiver_default_axis_values
             .get(&receiver)
             .unwrap_or(&1.)
-            .clone()
     }
 
     /// Set the button state for a specific key receiver.
-    pub fn set_key_receiver_state(&mut self, key: BindingInputReceiver, state: PressState) {
+    pub fn set_key_receiver_state(&mut self, key: InputReceiver, state: PressState) {
         self.key_receiver_states.insert(key, state);
     }
 
     /// Set the axis state for a specific axis receiver.
     pub fn set_axis_value(
         &mut self,
-        receiver: BindingInputReceiver,
+        receiver: InputReceiver,
         value: f32,
         element_state: PressState,
     ) {
@@ -113,10 +114,9 @@ where
                 let states: Vec<PressState> =
                     r.0.iter()
                         .map(|x| {
-                            self.key_receiver_states
+                            *self.key_receiver_states
                                 .get(x)
                                 .unwrap_or(&PressState::Released)
-                                .clone()
                         })
                         .collect();
                 if states.is_empty() {
@@ -127,7 +127,7 @@ where
                         continue 'initial;
                     }
                 }
-                return states.iter().min().unwrap().clone();
+                return *states.iter().max().unwrap();
             }
         }
         PressState::Released
@@ -141,10 +141,9 @@ where
                 let states: Vec<AxisState> =
                     r.0.iter()
                         .map(|x| {
-                            self.axis_receiver_states
+                            *self.axis_receiver_states
                                 .get(x)
                                 .unwrap_or(&AxisState(0., PressState::Released))
-                                .clone()
                         })
                         .collect();
                 if states.is_empty() {
@@ -161,8 +160,26 @@ where
         Vec::new()
     }
 
-    /// Change the value of the last active input source.
-    pub fn set_last_input_source(&mut self, input_source: Option<InputSource>) {
-        self.last_input_source = input_source;
+    /// A utility function for removing all receivers with a specific source.
+    pub fn clear_from_specific_source(&mut self, source: InputSource) {
+        for binding in self.bindings.values_mut() {
+            let mut rcvs_: HashSet<InputReceivers> = HashSet::new();
+            for rcvs in binding.input_receivers.iter() {
+                let rcvs: Vec<InputReceiver> = rcvs
+                    .0
+                    .iter()
+                    .filter(|x| x.source() != source).copied()
+                    .collect();
+                if !rcvs.is_empty() {
+                    rcvs_.insert(InputReceivers(rcvs));
+                }
+            }
+            binding.input_receivers = rcvs_;
+            binding
+                .default_axis_value
+                .retain(|k, _| k.source() != source);
+        }
+        self.receiver_default_axis_values
+            .retain(|k, _| k.source() != source);
     }
 }

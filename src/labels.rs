@@ -7,7 +7,7 @@ use bevy::prelude::SystemLabel;
 pub enum EZInputLabels {
     /// Label for the sytem responsible for handling the gamepad input.
     GamepadSystem,
-    
+
     /// Label for the system responsible for handling the keyboard input.
     KeyboardSystem,
 

@@ -3,7 +3,7 @@ use crate::prelude::*;
 use bevy::{input::keyboard::KeyboardInput, prelude::*};
 
 /// Service responsible for allowing EZInput to handle keyboard input for a specific entity.
-#[derive(PartialEq, Debug, Component, Clone, Copy, Default)]
+#[derive(PartialEq, Eq, Debug, Component, Clone, Copy, Default)]
 pub struct EZInputKeyboardService;
 
 impl EZInputKeyboardService {
@@ -16,15 +16,15 @@ impl EZInputKeyboardService {
     ) where
         Keys: BindingTypeView,
     {
-        view.set_last_input_source(Some(InputSource::Keyboard));
-        view.set_key_receiver_state(BindingInputReceiver::KeyboardKey(key), state);
+        view.last_input_source = Some(InputSource::Keyboard);
+        view.set_key_receiver_state(InputReceiver::KeyboardKey(key), state);
         let value = match state {
             PressState::Pressed { .. } => {
-                view.get_receiver_default_axis_value(BindingInputReceiver::KeyboardKey(key))
+                view.get_receiver_default_axis_value(InputReceiver::KeyboardKey(key))
             }
             PressState::Released => 0.,
         };
-        view.set_axis_value(BindingInputReceiver::KeyboardKey(key), value, state);
+        view.set_axis_value(InputReceiver::KeyboardKey(key), value, state);
     }
 }
 

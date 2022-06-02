@@ -1,49 +1,33 @@
-use bevy::prelude::*;
-use ezinput::prelude::*;
-use ezinput_macros::*;
-use strum_macros::Display;
+use bevy::prelude::{App, Bundle, Commands, Component, DefaultPlugins, Query, With};
+use ezinput::prelude::{InputReceiver::*, *};
 
-#[derive(BindingTypeView, Debug, Copy, Clone, PartialEq, Eq, Hash, Display)]
-pub enum EnumeratedBinding {
-    Movement(EnumeratedMovementBinding),
+input! {
+    EnumeratedBinding {
+        Movement<EnumeratedMovementBinding> {
+            Jump = [KeyboardKey(KeyCode::Space), GamepadButton(GamepadButtonType::South)],
+            Vertical = [KeyboardKey(KeyCode::W), KeyboardKey(KeyCode::S) => -1., GamepadButton(GamepadButtonType::South)],
+            Horizontal = [KeyboardKey(KeyCode::A) => -1. /* default axis value */, KeyboardKey(KeyCode::D), GamepadAxis(GamepadAxisType::LeftStickX)],
+        }
+    }
 }
 
-#[derive(BindingTypeView, Debug, Copy, Clone, PartialEq, Eq, Hash, Display)]
-pub enum EnumeratedMovementBinding {
-    Jump,
-    Left,
-    Right,
-}
-
-#[derive(Bundle)]
-pub struct InputBundle {
-    #[bundle]
-    input_bundle: InputHandlingBundle<EnumeratedBinding>,
-    keyboard_input: EZInputKeyboardService,
-    mouse_input: EZInputMouseService,
-    gamepad_input: EZInputGamepadService, // You may remove fields for input you don't want to support.
-}
+type EnumeratedInputView = InputView<EnumeratedBinding>;
 
 #[derive(Component, Default)]
 pub struct Player;
 
 #[derive(Bundle)]
 pub struct PlayerBundle {
-    player: Player,
+    marker: Player,
     #[bundle]
-    input: InputBundle,
+    pub input: InputHandlingBundle<EnumeratedBinding>,
 }
 
-impl PlayerBundle {
-    pub fn from_input_view(view: InputView<EnumeratedBinding>) -> Self {
+impl Default for PlayerBundle {
+    fn default() -> Self {
         Self {
-            player: Player,
-            input: InputBundle {
-                input_bundle: InputHandlingBundle { view },
-                keyboard_input: EZInputKeyboardService::default(),
-                mouse_input: EZInputMouseService::default(),
-                gamepad_input: EZInputGamepadService::default(),
-            },
+            marker: Player,
+            input: InputHandlingBundle::new(EnumeratedBinding::view()),
         }
     }
 }
@@ -58,33 +42,10 @@ fn main() {
 }
 
 fn spawn_player(mut commands: Commands) {
-    let mut view = InputView::empty();
-
-    use ezinput::prelude::BindingInputReceiver::*;
-    use EnumeratedBinding::*;
-    use EnumeratedMovementBinding::*;
-
-    view.add_binding(
-        ActionBinding::from(Movement(Jump))
-            .receiver(KeyboardKey(KeyCode::Space))
-            .receiver(GamepadButton(GamepadButtonType::South)),
-    );
-    view.add_binding(
-        ActionBinding::from(Movement(Left))
-            .receiver(KeyboardKey(KeyCode::A))
-            .receiver(GamepadAxis(GamepadAxisType::LeftStickX))
-            .default_axis_value(KeyboardKey(KeyCode::A), -1.),
-    );
-    view.add_binding(
-        ActionBinding::from(Movement(Right))
-            .receiver(KeyboardKey(KeyCode::D))
-            .receiver(GamepadAxis(GamepadAxisType::LeftStickX)),
-    );
-
-    commands.spawn_bundle(PlayerBundle::from_input_view(view));
+    commands.spawn_bundle(PlayerBundle::default());
 }
 
-fn check_input(query: Query<&InputView<EnumeratedBinding>, With<Player>>) {
+fn check_input(query: Query<&EnumeratedInputView, With<Player>>) {
     let view = query.single();
     use EnumeratedBinding::*;
     use EnumeratedMovementBinding::*;
@@ -97,9 +58,10 @@ fn check_input(query: Query<&InputView<EnumeratedBinding>, With<Player>>) {
         println!("{:?} => Jumping for {:?}", view.last_input_source, elapsed);
     }
 
-    if let Some(left_axis) = view.axis(&Movement(Left)).first() {
-        if left_axis.1 != PressState::Released && left_axis.0 < 0. {
-            println!("{:?} => Left: {:?}", view.last_input_source, left_axis.0);
+    if let Some(axis) = view.axis(&Movement(Horizontal)).first() {
+        if axis.1 != PressState::Released {
+            let action = if axis.0 < 0. { "Left" } else { "Right" };
+            println!("{:?} => {action}: {:?}", view.last_input_source, axis.0);
         }
     }
 }
