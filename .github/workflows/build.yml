@@ -6,14 +6,32 @@ env:
   CARGO_TERM_COLOR: always
   
 jobs:
-  build_and_test:
-    name: EZInput for Bevy
+  cargo-ubuntu-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - name: 'Use Cache: Rust'
+        uses: actions/cache@v2
+        with: 
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+            - name: Use Cache
+      - name: Install game development libraries/dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install pkg-config libx11-dev libasound2-dev libudev-dev
+      - name: Install latest nightly
+        uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
+          override: true
       - uses: actions-rs/cargo@v1
         with:
           command: build
