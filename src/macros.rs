@@ -1,7 +1,7 @@
 /// A macro that generates input-related enumerations for easier use in ezinput.
-/// 
+///
 /// ## Examples
-/// 
+///
 /// This code:
 /// ```rust
 /// input! {
@@ -44,7 +44,7 @@
 ///     }
 /// }
 /// ```
-/// 
+///
 #[macro_export]
 macro_rules! input {
     {

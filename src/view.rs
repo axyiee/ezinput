@@ -3,7 +3,6 @@
 use std::collections::HashMap;
 
 use bevy::{prelude::Component, utils::hashbrown::HashSet};
-use either::Either;
 
 use crate::prelude::*;
 
@@ -99,10 +98,10 @@ where
 
     /// Returns the default axis value for a receiver, or `1` if not found.
     pub fn get_receiver_default_axis_value(&self, receiver: InputReceiver) -> f32 {
-        self.receiver_default_axis_values
+        *self
+            .receiver_default_axis_values
             .get(&receiver)
             .unwrap_or(&1.)
-            .clone()
     }
 
     /// Set the button state for a specific key receiver.
@@ -132,11 +131,7 @@ where
 
     /// Return the current press state for a specific binding matching with the given BindingTypeView.
     pub fn key(&self, kind: &Keys) -> PressState {
-        self.axis(kind)
-            .first()
-            .unwrap_or(&AxisState::ZERO)
-            .press
-            .clone()
+        self.axis(kind).first().unwrap_or(&AxisState::ZERO).press
     }
 
     /// Return the current axis state for a specific binding matching with the given BindingTypeView.

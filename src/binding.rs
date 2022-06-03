@@ -11,7 +11,7 @@ pub trait BindingTypeView:
 {
 }
 
-/// 
+///
 #[derive(
     PartialEq, Eq, Hash, Clone, Copy, Debug, Deserialize, Serialize, strum_macros::Display,
 )]

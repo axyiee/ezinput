@@ -20,9 +20,9 @@ pub mod prelude {
     pub use crate::macros::*;
     pub use crate::mouse::*;
     pub use crate::plugin::*;
+    pub use crate::prelude::InputReceiver::*;
     pub use crate::press_state::*;
     pub use crate::view::*;
     pub use crate::BindingTypeView;
     pub use bevy::prelude::{GamepadAxisType, GamepadButtonType, KeyCode, MouseButton};
-    pub use crate::prelude::InputReceiver::*;
 }

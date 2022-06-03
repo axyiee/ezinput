@@ -56,11 +56,7 @@ impl PressState {
     /// Returns whether the button or axis is currently pressed or moving.
     #[inline]
     pub fn pressed(&self) -> bool {
-        if let PressState::Pressed { .. } = *self {
-            true
-        } else {
-            false
-        }
+        matches!(*self, PressState::Pressed { .. })
     }
 
     /// Returns the elapsed time since the action was pressed.

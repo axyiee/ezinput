@@ -1,8 +1,6 @@
 //! Keyboard assigned for player 1, and controller assigned for player 2
 
-use bevy::{
-    prelude::{App, Bundle, Commands, Component, DefaultPlugins, Query, With},
-};
+use bevy::prelude::{App, Bundle, Commands, Component, DefaultPlugins, Query, With};
 use ezinput::prelude::{InputReceiver::*, *};
 
 input! {
