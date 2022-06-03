@@ -23,14 +23,14 @@ pub enum MouseAxisType {
 
 /// Mouse button, location and delta support for EZInput.
 #[derive(PartialEq, Debug, Component, Clone, Default)]
-pub struct EZInputMouseService {
+pub struct MouseMarker {
     pub mouse_position: Option<Vec2>,
     pub mouse_delta: Option<Vec2>,
     pub does_mouse_location_changed_this_tick: bool,
     pub does_mouse_wheel_changed_this_tick: bool,
 }
 
-impl EZInputMouseService {
+impl MouseMarker {
     /// Change the current mouse location and delta and set the last input source to Mouse.
     pub fn set_mouse_location<Keys>(
         &mut self,
@@ -127,7 +127,7 @@ impl EZInputMouseService {
 
 /// Input system responsible for handling mouse input and setting the button state for each updated button and axis.
 pub(crate) fn mouse_input_system<Keys>(
-    mut query: Query<(&mut InputView<Keys>, &mut EZInputMouseService)>,
+    mut query: Query<(&mut InputView<Keys>, &mut MouseMarker)>,
     mut cursor_rd: EventReader<CursorMoved>,
     mut btn_rd: EventReader<MouseButtonInput>,
     mut mtn_rd: EventReader<MouseMotion>,

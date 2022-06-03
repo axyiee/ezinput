@@ -17,18 +17,18 @@ where
     Keys: BindingTypeView,
 {
     pub input: InputView<Keys>,
-    pub keyboard_input: EZInputKeyboardService,
-    pub mouse_input: EZInputMouseService,
-    pub gamepad_input: EZInputGamepadService,
+    pub keyboard_input: KeyboardMarker,
+    pub mouse_input: MouseMarker,
+    pub gamepad_input: GamepadMarker,
 }
 
 impl<Keys: BindingTypeView> InputHandlingBundle<Keys> {
     pub fn new(input: InputView<Keys>) -> Self {
         Self {
             input,
-            keyboard_input: EZInputKeyboardService::default(),
-            mouse_input: EZInputMouseService::default(),
-            gamepad_input: EZInputGamepadService::default(),
+            keyboard_input: KeyboardMarker::default(),
+            mouse_input: MouseMarker::default(),
+            gamepad_input: GamepadMarker::default(),
         }
     }
 }

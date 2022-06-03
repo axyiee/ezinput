@@ -13,16 +13,31 @@
         <img src="https://img.shields.io/docsrs/ezinput?logo=docs.rs&colorA=1e1e28&colorB=1187c9&style=for-the-badge" alt="GitHub Actions" />
     </a>
     <br/>
-    <strong>Easier joystick, mouse and keyboard input handling in Bevy</strong>
+    <strong>A powerful input-agnostic library targeting complete support to axis and button handling for the Bevy game engine.</strong>
 </div>
 
 
 ### Table of contents
 
+1. [About](#about)
 1. [Branches](#branches)
-2. [Installation](#installation)
-3. [Examples](https://git.exst.fun/ezinput/tree/master/examples)
+1. [Getting started](#getting-started)
+1. [Examples](https://git.exst.fun/ezinput/tree/master/examples)
 
+
+## About
+
+Input is relative; the library itself currently implements by default keyboard, mouse and gamepad support, but this is subject to change.
+Please feel free to contribute to the library by submitting pull requests. Touch support is stil planned, but not yet implemented.
+
+ezinput strives to be simple as possible, while still being powerful and flexible without using any unsafe code.
+
+All bindings are stored in a `InputView` struct, which is passed as a component to ECS entitier. To allow an input method to be handled,
+you need to add a service marker component (`MouseMarker`, `KeyboardMarker` or `GamepadMarker`). You aren't limited to one marker, since
+you can use multiple markers to handle multiple input methods.
+
+Not everything is documented yet or documented with a high level of detail, so any feedback is appreciated. You can contact me on [Discord]
+or here on GitHub!
 
 ## Branches
 
@@ -42,10 +57,58 @@
 </table>
 
 
-## Installation
+## Getting started
 
 Add the following to your `Cargo.toml` (replace `^0.3` with the latest version):
 ```toml
 [dependencies]
 ezinput = "^0.3"
 ```
+
+* Now, you need to import `ezinput::prelude::*`.
+* Create an input view by using the `input!` macro. You can see an example [here](https://git.exst.fun/ezinput/tree/bevy_main/examples). 
+```rust
+use ezinput::prelude::*;
+
+input! {
+    EnumeratedBinding {
+        Movement<EnumeratedMovementBinding> {
+            Vertical = [KeyboardKey(KeyCode::W), KeyboardKey(KeyCode::S) => -1., GamepadAxis(GamepadAxisType::LeftStickY)],
+            Horizontal = [KeyboardKey(KeyCode::A) => -1. /* default axis value */, KeyboardKey(KeyCode::D), GamepadAxis(GamepadAxisType::LeftStickX)],
+        },
+    }
+}
+
+// Is the same as this:
+// #[derive(BindingTypeView, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+// pub enum EnumeratedBinding {
+//     Movement(EnumeratedMovementBinding),
+// }
+
+// #[derive(BindingTypeView, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+// pub enum EnumeratedMovementBinding {
+//     Vertical,
+//     Horizontal,
+// }
+
+// impl EnumeratedBinding {
+//     pub fn view() -> InputView<Self> {
+//         let mut view = InputView::new();
+//         EnumeratdMovementBinding::apply(&mut view);
+//         view
+//     }
+// }
+
+// impl EnumeratedMovementBinding {
+//     pub fn apply(view: &mut InputView<EnumeratedBinding>) {
+//         let mut binding = ActionBinding::from(EnumeratedBinding::Movement(EnumeratedMovementBinding::Vertical));
+//         binding.receiver(KeyboardKey(KeyCode::W));
+//         binding.receiver(KeyboardKey(KeyCode::S));
+//         binding.default_axis_value(KeyboardKey(KeyCode::S), -1);
+//         view.add_binding(binding);
+//         // ...
+//     }
+// }
+```
+
+[Discord]: https://discord.com/users/929877747151548487

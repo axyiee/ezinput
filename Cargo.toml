@@ -2,8 +2,8 @@
 name = "ezinput"
 version = "0.3.0"
 edition = "2021"
-exclude = [".vscode/**"]
-description = "Easier joystick, mouse and keyboard input handling in Bevy"
+exclude = [".vscode/**", ".github/**"]
+description = "A powerful input-agnostic library targeting complete support to axis and button handling for the Bevy game engine."
 license = "MIT"
 repository = "https://github.com/eexsty/ezinput"
 readme = "README.md"

@@ -41,7 +41,7 @@ impl PlayerBundle {
         commands
             .spawn_bundle(Self::new("Player 1"))
             .insert(view)
-            .insert(EZInputKeyboardService);
+            .insert(KeyboardMarker);
     }
     pub fn two(commands: &mut Commands) {
         let mut view = EnumeratedBinding::view();
@@ -49,7 +49,7 @@ impl PlayerBundle {
         commands
             .spawn_bundle(Self::new("Player 2"))
             .insert(view)
-            .insert(EZInputGamepadService::default());
+            .insert(GamepadMarker::default());
     }
 }
 

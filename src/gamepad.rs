@@ -6,16 +6,16 @@ use crate::prelude::*;
 /// Service responsible for storing a specific gamepad for a entity,
 /// and allowing for handling gamepad input.
 #[derive(PartialEq, Eq, Debug, Component, Clone)]
-pub struct EZInputGamepadService(pub Gamepad);
+pub struct GamepadMarker(pub Gamepad);
 
 /// Implementation that creates a gamepad service with the first gamepad by default.
-impl Default for EZInputGamepadService {
+impl Default for GamepadMarker {
     fn default() -> Self {
         Self(Gamepad::new(0))
     }
 }
 
-impl EZInputGamepadService {
+impl GamepadMarker {
     /// Change the current button state for the given button and set the last input source to Gamepad.
     pub fn set_gamepad_button_state<Keys>(
         &mut self,
@@ -49,7 +49,7 @@ impl EZInputGamepadService {
 
 /// Input system responsible for handling gamepad input and setting the button state for each updated button and axis.
 pub(crate) fn gamepad_input_system<Keys>(
-    mut query: Query<(&mut InputView<Keys>, &mut EZInputGamepadService)>,
+    mut query: Query<(&mut InputView<Keys>, &mut GamepadMarker)>,
     mut rd: EventReader<GamepadEvent>,
 ) where
     Keys: BindingTypeView,

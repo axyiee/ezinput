@@ -4,9 +4,9 @@ use bevy::{input::keyboard::KeyboardInput, prelude::*};
 
 /// Service responsible for allowing EZInput to handle keyboard input for a specific entity.
 #[derive(PartialEq, Eq, Debug, Component, Clone, Copy, Default)]
-pub struct EZInputKeyboardService;
+pub struct KeyboardMarker;
 
-impl EZInputKeyboardService {
+impl KeyboardMarker {
     /// Change the current button and axis state for the given key for and set the last input source to Keyboard.
     pub fn set_keyboard_key_state<Keys>(
         &mut self,
@@ -30,7 +30,7 @@ impl EZInputKeyboardService {
 
 /// Input system responsible for handling keyboard input and setting the button state for each updated button and axis.
 pub(crate) fn keyboard_input_system<Keys: BindingTypeView>(
-    mut query: Query<(&mut InputView<Keys>, &mut EZInputKeyboardService)>,
+    mut query: Query<(&mut InputView<Keys>, &mut KeyboardMarker)>,
     mut rd: EventReader<KeyboardInput>,
 ) {
     for (mut view, mut keyboard_svc) in query.iter_mut() {

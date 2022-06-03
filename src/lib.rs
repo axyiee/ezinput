@@ -1,22 +1,5 @@
-//! An input-agnostic library targeting complete support to axis and button handling for many input sources.
-//!
-//! Input is relative; the library itself currently implements by default keyboard, mouse and controller, but
-//! you can add your own input sources
-//!
-//! ## Features
-//! - Full joystick and keyboard support for both axis and buttons.
-//! - Support for mouse position and delta changes and buttons.
-//! - Builder-like pattern for creating bindings.
-//! - Support for multiple input receivers.
-//! - Allow bindings to be stored in a single view, meaning that you do not need a separate view for keyboard/mouse/gamepad.
-//! - Support for multiple bindings per view.
-//! - Support for per-entity views, meaning that multiplayer is supported.
-//! - Full support for axis and button combinations.
-//!
-//! ## Current limitations
-//! - Mouse wheel support is not implemented yet.
-//!
-//! If you are interested in examples, you cand find them in the `examples` directory in the source code.
+#![forbid(unsafe_code)]
+#![doc = include_str!("../README.md")]
 
 pub mod binding;
 pub mod bundle;
@@ -26,8 +9,24 @@ pub mod labels;
 pub mod macros;
 pub mod mouse;
 pub mod plugin;
-pub mod prelude;
 pub mod press_state;
 pub mod tick;
 pub mod view;
 pub use ezinput_macros::*;
+
+pub mod prelude {
+    pub use crate::binding::*;
+    pub use crate::bundle::*;
+    pub use crate::gamepad::*;
+    pub use crate::keyboard::*;
+    pub use crate::labels::*;
+    pub use crate::macros::*;
+    pub use crate::mouse::*;
+    pub use crate::plugin::*;
+    pub use crate::press_state::*;
+    pub(crate) use crate::tick::*;
+    pub use crate::view::*;
+    pub use crate::BindingTypeView;
+    pub use bevy::prelude::{GamepadAxisType, GamepadButtonType, KeyCode, MouseButton};
+    pub use crate::prelude::InputReceiver::*;
+}
