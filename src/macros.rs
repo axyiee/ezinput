@@ -1,3 +1,50 @@
+/// A macro that generates input-related enumerations for easier use in ezinput.
+/// 
+/// ## Examples
+/// 
+/// This code:
+/// ```rust
+/// input! {
+///     EnumeratedBinding {
+///         Movement<EnumeratedMovementBinding> {
+///             Vertical = [KeyboardKey(KeyCode::W), KeyboardKey(KeyCode::S) => -1., GamepadAxis(GamepadAxisType::LeftStickY)],
+///             Horizontal = [KeyboardKey(KeyCode::A) => -1. /* default axis value */, KeyboardKey(KeyCode::D), GamepadAxis(GamepadAxisType::LeftStickX)],
+///         },
+///     }
+/// }
+/// ```
+/// produces the code below:
+/// ```rust
+/// #[derive(BindingTypeView, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// pub enum EnumeratedBinding {
+///     Movement(EnumeratedMovementBinding),
+/// }
+
+/// #[derive(BindingTypeView, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// pub enum EnumeratedMovementBinding {
+///     Vertical,
+///     Horizontal,
+/// }
+
+/// impl EnumeratedBinding {
+///     pub fn view() -> InputView<Self> {
+///         let mut view = InputView::new();
+///         EnumeratdMovementBinding::apply(&mut view);
+///         view
+///     }
+/// }
+/// impl EnumeratedMovementBinding {
+///     pub fn apply(view: &mut InputView<EnumeratedBinding>) {
+///         let mut binding = ActionBinding::from(EnumeratedBinding::Movement(EnumeratedMovementBinding::Vertical));
+///         binding.receiver(KeyboardKey(KeyCode::W));
+///         binding.receiver(KeyboardKey(KeyCode::S));
+///         binding.default_axis_value(KeyboardKey(KeyCode::S), -1);
+///         view.add_binding(binding);
+///         // ...
+///     }
+/// }
+/// ```
+/// 
 #[macro_export]
 macro_rules! input {
     {
