@@ -11,6 +11,7 @@ use bevy::utils::Instant;
 #[derive(SystemLabel, Clone, Hash, Debug, PartialEq, Eq)]
 pub struct InputHandlingTickSystem;
 
+/// A [`Plugin`] that handles [`Input`] from different type of input sources.
 pub struct EZInputPlugin<Keys>
 where
     Keys: BindingTypeView,
