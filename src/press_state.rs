@@ -2,10 +2,10 @@
 #[allow(unused_imports)]
 use std::ops::Add;
 
-use bevy::input::ElementState;
+use bevy::input::ButtonState;
 use bevy::utils::{Duration, Instant};
 
-/// The press state for a button or axis.
+/// The current state of a specific axis or button. By default, calls return [`PressState::Released`].
 #[derive(PartialEq, Eq, Hash, Clone, Copy, Debug, strum_macros::Display)]
 pub enum PressState {
     /// The button or axis is pressed, along with the initial instant for the press.
@@ -19,46 +19,55 @@ pub enum PressState {
     /// The button or axis is released.
     Released,
 }
-
-/// Main implementation for `PressState`.
-/// This `impl` strives to make the API the simplest and cleaner possible, maintaing code reability.
 impl PressState {
-    /// Check if the current press state is released or not.
+    /// Returns whether if the current press state is released or not.
+    #[inline]
     pub fn released(&self) -> bool {
-        self == &PressState::Released
+        *self == PressState::Released
     }
 
-    /// Check if the current press state is pressed for more than a specific duration.
-    pub fn pressed_for(&self, duration: Duration) -> bool {
-        match self {
-            PressState::Pressed {
-                started_pressing_instant,
-            } => {
-                started_pressing_instant.is_some()
-                    && started_pressing_instant.unwrap().elapsed() >= duration
-            }
-            _ => false,
+    /// Returns whether if the current press state is pressed for more than a specific duration.
+    #[inline]
+    pub fn is_pressed_for(&self, duration: Duration) -> bool {
+        if let PressState::Pressed {
+            started_pressing_instant,
+        } = *self
+        {
+            started_pressing_instant.is_some()
+                && started_pressing_instant.unwrap().elapsed() >= duration
+        } else {
+            false
         }
     }
 
-    /// Check if the current press state was just pressed or not.
+    /// Returns whether the button or axis was just pressed or moved in this exact tick or not.
+    #[inline]
     pub fn just_pressed(&self) -> bool {
-        match self {
-            PressState::Pressed {
-                started_pressing_instant,
-            } => started_pressing_instant.is_none(),
-            _ => false,
+        if let PressState::Pressed {
+            started_pressing_instant,
+        } = *self
+        {
+            started_pressing_instant.is_none()
+        } else {
+            false
         }
     }
 
-    /// Return the elapsed time since the action was pressed
+    /// Returns whether the button or axis is currently pressed or moving.
+    #[inline]
+    pub fn pressed(&self) -> bool {
+        matches!(*self, PressState::Pressed { .. })
+    }
+
+    /// Returns the elapsed time since the action was pressed.
+    #[inline]
     pub fn elapsed(&self) -> Option<Duration> {
         match self {
             PressState::Pressed {
                 started_pressing_instant,
-            } => {
-                started_pressing_instant.as_ref().map(|started_pressing_instant| started_pressing_instant.elapsed())
-            }
+            } => started_pressing_instant
+                .as_ref()
+                .map(|started_pressing_instant| started_pressing_instant.elapsed()),
             _ => None,
         }
     }
@@ -106,14 +115,13 @@ impl Ord for PressState {
 
 /// Implementation responsible for translating Bevy element states to EZInput press states.
 /// By default, the default pressing instant is the None.
-impl From<ElementState> for PressState {
-    fn from(value: ElementState) -> PressState {
+impl From<ButtonState> for PressState {
+    fn from(value: ButtonState) -> PressState {
         match value {
-            ElementState::Pressed => PressState::Pressed {
+            ButtonState::Pressed => PressState::Pressed {
                 started_pressing_instant: None,
             },
-            ElementState::Released => PressState::Released,
-    
+            ButtonState::Released => PressState::Released,
         }
     }
 }
