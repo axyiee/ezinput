@@ -2,7 +2,7 @@
 #[allow(unused_imports)]
 use std::ops::Add;
 
-use bevy::input::ElementState;
+use bevy::input::ButtonState;
 use bevy::utils::{Duration, Instant};
 
 /// The press state for a button or axis.
@@ -106,13 +106,13 @@ impl Ord for PressState {
 
 /// Implementation responsible for translating Bevy element states to EZInput press states.
 /// By default, the default pressing instant is the None.
-impl From<ElementState> for PressState {
-    fn from(value: ElementState) -> PressState {
+impl From<ButtonState> for PressState {
+    fn from(value: ButtonState) -> PressState {
         match value {
-            ElementState::Pressed => PressState::Pressed {
+            ButtonState::Pressed => PressState::Pressed {
                 started_pressing_instant: None,
             },
-            ElementState::Released => PressState::Released,
+            ButtonState::Released => PressState::Released,
     
         }
     }

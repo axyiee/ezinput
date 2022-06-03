@@ -11,7 +11,7 @@ pub struct EZInputGamepadService(pub Gamepad);
 /// Implementation that creates a gamepad service with the first gamepad by default.
 impl Default for EZInputGamepadService {
     fn default() -> Self {
-        Self(Gamepad(0))
+        Self(Gamepad::new(0))
     }
 }
 
@@ -55,10 +55,10 @@ pub(crate) fn gamepad_input_system<Keys>(
     Keys: BindingTypeView,
 {
     for ev in rd.iter() {
-        match ev.1 {
+        match ev.event_type {
             GamepadEventType::ButtonChanged(kind, duration) => {
                 for (mut view, mut svc) in query.iter_mut() {
-                    if ev.0 != svc.0 {
+                    if ev.gamepad != svc.0 {
                         continue;
                     }
                     let state = if duration.abs() <= 0.1 {
@@ -74,7 +74,7 @@ pub(crate) fn gamepad_input_system<Keys>(
             }
             GamepadEventType::AxisChanged(kind, value) => {
                 for (mut view, mut svc) in query.iter_mut() {
-                    if ev.0 != svc.0 {
+                    if ev.gamepad != svc.0 {
                         continue;
                     }
                     let state = if value.abs() <= 0.1 {
