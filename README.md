@@ -19,13 +19,33 @@
 
 ### Table of contents
 
-1. [Installation](#installation)
-2. [Examples](https://git.exst.fun/ezinput/tree/master/examples)
+1. [Branches](#branches)
+2. [Installation](#installation)
+3. [Examples](https://git.exst.fun/ezinput/tree/master/examples)
+
+
+## Branches
+
+<table>
+    <tr>
+        <th>Branch</th>
+        <th>Bevy version</th>
+    </tr>
+    <tr>
+        <td>master</td>
+        <td><code>^0.7</code></td>
+    </tr>
+    <tr>
+       <td>bevy_main</td>
+       <td><strong>git (https://github.com/bevyengine/bevy.git)</td>
+    </tr>
+</table>
+
 
 ## Installation
 
-Add the following to your `Cargo.toml` (replace `x.y.z` with the latest version):
+Add the following to your `Cargo.toml` (replace `^0.3` with the latest version):
 ```toml
 [dependencies]
-ezinput = "x.y.z"
+ezinput = "^0.3"
 ```
