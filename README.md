@@ -32,12 +32,19 @@ Please feel free to contribute to the library by submitting pull requests. Touch
 
 ezinput strives to be simple as possible, while still being powerful and flexible without using any unsafe code.
 
-All bindings are stored in a `InputView` struct, which is passed as a component to ECS entitier. To allow an input method to be handled,
-you need to add a service marker component (`MouseMarker`, `KeyboardMarker` or `GamepadMarker`). You aren't limited to one marker, since
-you can use multiple markers to handle multiple input methods.
+All bindings are stored in a `InputView` struct, which is passed as a component to your ECS entitity. To allow an input method to be handled,
+you need to add a service marker component (`MouseMarker`, `KeyboardMarker` or `GamepadMarker`) to the ECS entity. You aren't limited to one marker, since you can use multiple markers to handle multiple input methods. An advantage of this implementation is that input views aren't
+limited to specific input sources, so you can reutilize the same view for multiple input methods just by adding new input receivers to bindings.
 
 Not everything is documented yet or documented with a high level of detail, so any feedback is appreciated. You can contact me on [Discord]
 or here on GitHub!
+
+### Limitations
+
+* Mouse wheel support is not implemented yet.
+* Touch support is not implemented yet.
+* Input receivers are limited only to implemented input sources.
+* Input sources are a hard-coded enumeration (it might not be that bad in most cases though).
 
 ## Branches
 
