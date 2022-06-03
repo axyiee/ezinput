@@ -59,9 +59,9 @@ fn check_input(query: Query<&EnumeratedInputView, With<Player>>) {
     }
 
     if let Some(axis) = view.axis(&Movement(Horizontal)).first() {
-        if axis.1 != PressState::Released {
-            let action = if axis.0 < 0. { "Left" } else { "Right" };
-            println!("{:?} => {action}: {:?}", view.last_input_source, axis.0);
+        if axis.press != PressState::Released {
+            let action = if axis.value < 0. { "Left" } else { "Right" };
+            println!("{:?} => {action}: {:?}", view.last_input_source, axis.value);
         }
     }
 }

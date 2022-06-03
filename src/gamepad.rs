@@ -3,6 +3,9 @@ use bevy::prelude::*;
 
 use crate::prelude::*;
 
+#[derive(SystemLabel, Clone, Hash, Debug, PartialEq, Eq)]
+pub struct GamepadInputHandlingSystem;
+
 /// Service responsible for storing a specific gamepad for a entity,
 /// and allowing for handling gamepad input.
 #[derive(PartialEq, Eq, Debug, Component, Clone)]

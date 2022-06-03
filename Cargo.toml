@@ -26,6 +26,7 @@ serde = { version = "^1", features = ["derive"] }
 strum_macros = "^0.24"
 strum = { version = "^0.24", features = ["derive"] }
 ezinput_macros = { path = "./macros", version = "^0.2" }
+either = "^1.6"
 
 [[example]]
 name = "singleplayer"

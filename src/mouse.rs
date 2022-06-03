@@ -6,10 +6,13 @@ use crate::prelude::*;
 use bevy::{
     input::mouse::{MouseButtonInput, MouseMotion},
     math::Vec2,
-    prelude::{Component, EventReader, MouseButton, Query},
+    prelude::{Component, EventReader, MouseButton, Query, SystemLabel},
     window::CursorMoved,
 };
 use serde::{Deserialize, Serialize};
+
+#[derive(SystemLabel, Clone, Hash, Debug, PartialEq, Eq)]
+pub struct MouseInputHandlingSystem;
 
 /// All types of axis that can be moved in a mouse.
 #[derive(

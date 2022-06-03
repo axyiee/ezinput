@@ -75,13 +75,13 @@ fn check_input(query: Query<(&EnumeratedInputView, &Name), With<Player>>) {
         let name = &name.0;
 
         if let Some(vertical) = view.axis(&Movement(Vertical)).first() {
-            let action = if vertical.0 < 0. { "Down" } else { "Up" };
+            let action = if vertical.value < 0. { "Down" } else { "Up" };
 
-            if vertical.1.just_pressed() {
+            if vertical.press.just_pressed() {
                 println!("({name}) {:?} => {action}", view.last_input_source);
             }
 
-            if let Some(elapsed) = vertical.1.elapsed() {
+            if let Some(elapsed) = vertical.press.elapsed() {
                 println!(
                     "({name}) {:?} => {action} for {:?}",
                     view.last_input_source, elapsed
@@ -90,11 +90,11 @@ fn check_input(query: Query<(&EnumeratedInputView, &Name), With<Player>>) {
         }
 
         if let Some(axis) = view.axis(&Movement(Horizontal)).first() {
-            if axis.1 != PressState::Released {
-                let action = if axis.0 < 0. { "Left" } else { "Right" };
+            if axis.press != PressState::Released {
+                let action = if axis.value < 0. { "Left" } else { "Right" };
                 println!(
                     "({name}) {:?} => {action}: {:?}",
-                    view.last_input_source, axis.0
+                    view.last_input_source, axis.value
                 );
             }
         }

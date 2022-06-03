@@ -5,12 +5,10 @@ pub mod binding;
 pub mod bundle;
 pub mod gamepad;
 pub mod keyboard;
-pub mod labels;
 pub mod macros;
 pub mod mouse;
 pub mod plugin;
 pub mod press_state;
-pub mod tick;
 pub mod view;
 pub use ezinput_macros::*;
 
@@ -19,12 +17,10 @@ pub mod prelude {
     pub use crate::bundle::*;
     pub use crate::gamepad::*;
     pub use crate::keyboard::*;
-    pub use crate::labels::*;
     pub use crate::macros::*;
     pub use crate::mouse::*;
     pub use crate::plugin::*;
     pub use crate::press_state::*;
-    pub(crate) use crate::tick::*;
     pub use crate::view::*;
     pub use crate::BindingTypeView;
     pub use bevy::prelude::{GamepadAxisType, GamepadButtonType, KeyCode, MouseButton};

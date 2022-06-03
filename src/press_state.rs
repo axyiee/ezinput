@@ -29,7 +29,7 @@ impl PressState {
     }
 
     /// Check if the current press state is pressed for more than a specific duration.
-    pub fn pressed_for(&self, duration: Duration) -> bool {
+    pub fn is_pressed_for(&self, duration: Duration) -> bool {
         match self {
             PressState::Pressed {
                 started_pressing_instant,
@@ -61,6 +61,16 @@ impl PressState {
             }
             _ => None,
         }
+    }
+
+    pub fn press(&mut self, started_pressing_instant: Option<Instant>) {
+        *self = PressState::Pressed {
+            started_pressing_instant,
+        };
+    }
+
+    pub fn release(&mut self) {
+        *self = PressState::Released;
     }
 }
 

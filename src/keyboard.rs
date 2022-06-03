@@ -2,6 +2,9 @@
 use crate::prelude::*;
 use bevy::{input::keyboard::KeyboardInput, prelude::*};
 
+#[derive(SystemLabel, Clone, Hash, Debug, PartialEq, Eq)]
+pub struct KeyboardInputHandlingSystem;
+
 /// Service responsible for allowing EZInput to handle keyboard input for a specific entity.
 #[derive(PartialEq, Eq, Debug, Component, Clone, Copy, Default)]
 pub struct KeyboardMarker;
