@@ -1,6 +1,6 @@
 [package]
 name = "ezinput"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2021"
 exclude = [".vscode/**", ".github/**"]
 description = "A powerful input-agnostic library targeting complete support to axis and button handling for the Bevy game engine."
@@ -23,8 +23,6 @@ path = "src/lib.rs"
 [dependencies]
 bevy = { git = "https://github.com/bevyengine/bevy", features = ["serialize", "render", "x11", "bevy_gilrs"], default-features = false }
 serde = { version = "^1", features = ["derive"] }
-strum_macros = "^0.24"
-strum = { version = "^0.24", features = ["derive"] }
 ezinput_macros = { path = "./macros", version = "^0.2" }
 
 [[example]]

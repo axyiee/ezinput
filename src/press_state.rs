@@ -1,4 +1,5 @@
 //! The press state for a button or axis. Also useful methods for checking the elapsed time.
+use std::fmt::{Debug, Display};
 #[allow(unused_imports)]
 use std::ops::Add;
 
@@ -6,7 +7,7 @@ use bevy::input::ButtonState;
 use bevy::utils::{Duration, Instant};
 
 /// The current state of a specific axis or button. By default, calls return [`PressState::Released`].
-#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug, strum_macros::Display)]
+#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug)]
 pub enum PressState {
     /// The button or axis is pressed, along with the initial instant for the press.
     /// This need to be set as none if is the moment the button is just pressed, since it will
@@ -47,7 +48,11 @@ impl PressState {
             started_pressing_instant,
         } = *self
         {
-            started_pressing_instant.is_none()
+            if let Some(instant) = started_pressing_instant {
+                instant.elapsed().as_millis() <= 75
+            } else {
+                true
+            }
         } else {
             false
         }
@@ -67,7 +72,8 @@ impl PressState {
                 started_pressing_instant,
             } => started_pressing_instant
                 .as_ref()
-                .map(|started_pressing_instant| started_pressing_instant.elapsed()),
+                .map(|started_pressing_instant| started_pressing_instant.elapsed())
+                .or_else(|| Some(Duration::ZERO)),
             _ => None,
         }
     }
@@ -93,19 +99,6 @@ impl PartialOrd for PressState {
     }
 }
 
-// Test to compare if `PartialOrd` is implemented correctly.
-#[test]
-fn partial_ord_press_state_test() {
-    let a = PressState::Pressed {
-        started_pressing_instant: Some(Instant::now()),
-    };
-    let b = PressState::Pressed {
-        started_pressing_instant: Some(Instant::now().add(Duration::from_secs(342534))),
-    };
-    let value = a.cmp(&b);
-    assert_eq!(value, std::cmp::Ordering::Less);
-}
-
 /// Implement comparison between press states.
 impl Ord for PressState {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
@@ -124,4 +117,34 @@ impl From<ButtonState> for PressState {
             ButtonState::Released => PressState::Released,
         }
     }
+}
+
+/// Implementation responsible for allowing the input source to be displayed as a string.
+impl Display for PressState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match *self {
+            PressState::Pressed { .. } => {
+                if self.just_pressed() {
+                    write!(f, "Pressing since Now")
+                } else {
+                    write!(f, "Pressing for {:?}", self.elapsed())
+                }
+            }
+
+            PressState::Released => write!(f, "Released"),
+        }
+    }
+}
+
+// Test to compare if `PartialOrd` is implemented correctly.
+#[test]
+fn partial_ord_press_state_test() {
+    let a = PressState::Pressed {
+        started_pressing_instant: Some(Instant::now()),
+    };
+    let b = PressState::Pressed {
+        started_pressing_instant: Some(Instant::now().add(Duration::from_secs(342534))),
+    };
+    let value = a.cmp(&b);
+    assert_eq!(value, std::cmp::Ordering::Less);
 }

@@ -1,7 +1,7 @@
 //! This module contains [`BindingTypeView`] and [`ActionBinding`], in which they are used to
 //! implement the enumerated binding types and register the binding itself.
 use crate::prelude::*;
-use bevy::{prelude::*, utils::HashSet};
+use bevy::utils::HashSet;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fmt::Debug, hash::Hash};
 
@@ -9,31 +9,6 @@ use std::{collections::HashMap, fmt::Debug, hash::Hash};
 pub trait BindingTypeView:
     PartialEq + Eq + Hash + Clone + Copy + Debug + Send + Sync + 'static
 {
-}
-
-///
-#[derive(
-    PartialEq, Eq, Hash, Clone, Copy, Debug, Deserialize, Serialize, strum_macros::Display,
-)]
-pub enum InputReceiver {
-    KeyboardKey(KeyCode),
-    MouseButton(MouseButton),
-    GamepadButton(GamepadButtonType),
-    MouseAxis(MouseAxisType),
-    GamepadAxis(GamepadAxisType),
-    MouseAxisDelta(MouseAxisType),
-}
-
-impl InputReceiver {
-    pub fn source(&self) -> InputSource {
-        match *self {
-            InputReceiver::KeyboardKey(_) => InputSource::Keyboard,
-            InputReceiver::GamepadButton(_) | InputReceiver::GamepadAxis(_) => InputSource::Gamepad,
-            InputReceiver::MouseButton(_)
-            | InputReceiver::MouseAxis(_)
-            | InputReceiver::MouseAxisDelta(_) => InputSource::Mouse,
-        }
-    }
 }
 
 #[derive(PartialEq, Eq, Clone, Debug, Hash, Deserialize, Serialize, Default)]
@@ -120,10 +95,11 @@ where
     }
 
     /// Apply the default axis value for each registered receiver for a specific view.
-    pub fn apply_default_axis_to_all_receivers(&self, view: &mut InputView<InputKey>) -> &Self {
-        for (receiver, value) in self.default_axis_value.iter() {
-            view.add_receiver_default_axis_values(*receiver, *value);
+    pub fn apply_default_axis_to_all_receivers(&mut self, view: &mut InputView<InputKey>) -> &Self {
+        for (input, value) in self.default_axis_value.iter() {
+            view.descriptor_or_insert(*input).default_axis_value = *value;
         }
+        self.default_axis_value.clear();
         self
     }
 }

@@ -1,3 +1,5 @@
+//! Quality of life macros, usually for reducing boilerplate.
+
 /// A macro that generates input-related enumerations for easier use in ezinput.
 ///
 /// ## Examples
@@ -75,7 +77,7 @@ macro_rules! input {
                                 binding.default_axis_value($kind, $default);
                             )?
                         )*
-                        input.add_binding(&binding);
+                        input.add_binding(&mut binding);
                     )*
                 }
             }

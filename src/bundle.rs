@@ -1,16 +1,9 @@
-//! Utility for automatically inserting a type view into a Bevy entity.
+//! Definition of a ECS component bundle providing an input view and all supported input markers.
 
 use bevy::prelude::Bundle;
 
 use crate::prelude::*;
 
-// #[derive(Bundle)]
-// pub struct InputHandlingBundle<Keys> {
-//     pub input: InputView<Keys>,
-//     keyboard_input: EZInputKeyboardService,
-//     mouse_input: EZInputMouseService,
-//     gamepad_input: EZInputGamepadService, // You may remove fields for input you don't want to support.
-// }
 #[derive(Debug, Bundle)]
 pub struct InputHandlingBundle<Keys>
 where
