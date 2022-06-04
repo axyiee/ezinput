@@ -28,7 +28,6 @@ impl GamepadMarker {
         Keys: BindingTypeView,
     {
         view.last_input_source = Some(InputSource::Gamepad);
-        view.set_key_receiver_state(InputReceiver::GamepadButton(button), state);
         view.set_axis_value(InputReceiver::GamepadButton(button), duration, state);
     }
 
@@ -43,7 +42,6 @@ impl GamepadMarker {
         Keys: BindingTypeView,
     {
         view.last_input_source = Some(InputSource::Gamepad);
-        view.set_key_receiver_state(InputReceiver::GamepadAxis(axis), state);
         view.set_axis_value(InputReceiver::GamepadAxis(axis), duration, state);
     }
 }
