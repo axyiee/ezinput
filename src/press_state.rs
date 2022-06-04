@@ -73,7 +73,7 @@ impl PressState {
             } => started_pressing_instant
                 .as_ref()
                 .map(|started_pressing_instant| started_pressing_instant.elapsed())
-                .or_else(|| Some(Duration::ZERO)),
+                .or(Some(Duration::ZERO)),
             _ => None,
         }
     }

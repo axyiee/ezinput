@@ -49,7 +49,7 @@ fn check_input(query: Query<&EnumeratedInputView, With<Player>>) {
     let view = query.single();
     use EnumeratedBinding::*;
     use EnumeratedMovementBinding::*;
-    
+
     let jump = view.key(&Movement(Jump));
     if jump.pressed() {
         println!("{:?} => Jumping - {}", view.last_input_source, jump);

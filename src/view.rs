@@ -1,6 +1,6 @@
 //! A view is a object where all input states are stored. It also has useful methods such checking
 //! if a key or axis for a [`BindingTypeView`] is pressed or released by proving the [`PressState`].
-use std::{collections::HashMap, ops::Deref};
+use std::{collections::HashMap};
 
 use bevy::{prelude::Component, utils::hashbrown::HashSet};
 
@@ -193,13 +193,13 @@ where
         let binding = self.bindings.get(kind);
         if let Some(binding) = binding {
             'initial: for r in binding.input_receivers.iter() {
-                if r.0.len() == 0 {
+                if r.0.is_empty() {
                     continue 'initial;
                 }
                 let states = r.0.iter();
                 let mut output = Vec::with_capacity(states.len());
                 for rcv in states {
-                    let state = self.state(&rcv);
+                    let state = self.state(rcv);
                     if state.press.released() {
                         continue 'initial;
                     }
