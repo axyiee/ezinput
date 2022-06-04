@@ -32,7 +32,7 @@ Please feel free to contribute to the library by submitting pull requests. Touch
 
 ezinput strives to be simple as possible, while still being powerful and flexible without using any unsafe code.
 
-All bindings are stored in a `InputView` struct, which is passed as a component to your ECS entitity. To allow an input method to be handled,
+All bindings are stored in a `InputView` struct, which is passed as a component to your ECS entity. To allow an input method to be handled,
 you need to add a service marker component (`MouseMarker`, `KeyboardMarker` or `GamepadMarker`) to the ECS entity. You aren't limited to one marker, since you can use multiple markers to handle multiple input methods. An advantage of this implementation is that input views aren't
 limited to specific input sources, so you can reutilize the same view for multiple input methods just by adding new input receivers to bindings.
 
@@ -43,7 +43,7 @@ or here on GitHub!
 
 * Mouse wheel support is not implemented yet.
 * Touch support is not implemented yet.
-* Input receivers are limited only to implemented input sources.
+* Input receivers are limited to implemented input sources only.
 * Input sources are a hard-coded enumeration (it might not be that bad in most cases though).
 
 ## Branches
@@ -72,50 +72,11 @@ Add the following to your `Cargo.toml` (replace `^0.3` with the latest version):
 ezinput = "^0.3"
 ```
 
-* Now, you need to import `ezinput::prelude::*`.
-* Create an input view by using the `input!` macro. You can see an example [here](https://git.exst.fun/ezinput/tree/bevy_main/examples). 
-```rust
-use ezinput::prelude::*;
-
-input! {
-    EnumeratedBinding {
-        Movement<EnumeratedMovementBinding> {
-            Vertical = [KeyboardKey(KeyCode::W), KeyboardKey(KeyCode::S) => -1., GamepadAxis(GamepadAxisType::LeftStickY)],
-            Horizontal = [KeyboardKey(KeyCode::A) => -1. /* default axis value */, KeyboardKey(KeyCode::D), GamepadAxis(GamepadAxisType::LeftStickX)],
-        },
-    }
-}
-
-// Is the same as this:
-// #[derive(BindingTypeView, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-// pub enum EnumeratedBinding {
-//     Movement(EnumeratedMovementBinding),
-// }
-
-// #[derive(BindingTypeView, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-// pub enum EnumeratedMovementBinding {
-//     Vertical,
-//     Horizontal,
-// }
-
-// impl EnumeratedBinding {
-//     pub fn view() -> InputView<Self> {
-//         let mut view = InputView::new();
-//         EnumeratdMovementBinding::apply(&mut view);
-//         view
-//     }
-// }
-
-// impl EnumeratedMovementBinding {
-//     pub fn apply(view: &mut InputView<EnumeratedBinding>) {
-//         let mut binding = ActionBinding::from(EnumeratedBinding::Movement(EnumeratedMovementBinding::Vertical));
-//         binding.receiver(KeyboardKey(KeyCode::W));
-//         binding.receiver(KeyboardKey(KeyCode::S));
-//         binding.default_axis_value(KeyboardKey(KeyCode::S), -1);
-//         view.add_binding(binding);
-//         // ...
-//     }
-// }
-```
+* `use ezinput::prelude::*;`
+* Create an input view by using the `input!` macro. You can see an example [here](https://git.exst.fun/ezinput/tree/bevy_main/examples).
+  https://github.com/eexsty/ezinput/blob/master/src/macros.rs#L5-L45
+* Add the ezinput plugin to your application `app.add_plugin(EZInputPlugin::<TheNameOfYourBindingsEnum>::default());`
+* Add the input view components alongside markers to your ECS entities.
+* Done! You can handle input by using the `InputView` component! I recommend taking a look at the examples to get a feel for how to use it.
 
 [Discord]: https://discord.com/users/929877747151548487

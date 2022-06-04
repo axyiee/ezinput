@@ -6,12 +6,10 @@ use crate::prelude::*;
 #[derive(SystemLabel, Clone, Hash, Debug, PartialEq, Eq)]
 pub struct GamepadInputHandlingSystem;
 
-/// Service responsible for storing a specific gamepad for a entity,
-/// and allowing for handling gamepad input.
+// Marker responsible for allowing systems to listen to gamepad input.
 #[derive(PartialEq, Eq, Debug, Component, Clone)]
 pub struct GamepadMarker(pub Gamepad);
 
-/// Implementation that creates a gamepad service with the first gamepad by default.
 impl Default for GamepadMarker {
     fn default() -> Self {
         Self(Gamepad(0))

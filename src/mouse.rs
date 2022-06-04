@@ -15,9 +15,7 @@ use serde::{Deserialize, Serialize};
 pub struct MouseInputHandlingSystem;
 
 /// All types of axis that can be moved in a mouse.
-#[derive(
-    PartialEq, Eq, Hash, Clone, Copy, Debug, Deserialize, Serialize, strum_macros::Display,
-)]
+#[derive(PartialEq, Eq, Hash, Clone, Copy, Debug, Deserialize, Serialize)]
 pub enum MouseAxisType {
     X,
     Y,
@@ -79,11 +77,12 @@ impl MouseMarker {
     where
         Keys: BindingTypeView,
     {
-        view.set_axis_value(
-            InputReceiver::MouseAxis(MouseAxisType::X),
-            0.,
-            PressState::Released,
-        );
+        view.descriptor_or_insert(InputReceiver::MouseAxis(MouseAxisType::X))
+            .axis
+            .press = PressState::Released;
+        view.descriptor_or_insert(InputReceiver::MouseAxis(MouseAxisType::Y))
+            .axis
+            .press = PressState::Released;
         view.set_axis_value(
             InputReceiver::MouseAxis(MouseAxisType::Y),
             0.,
@@ -115,16 +114,6 @@ impl MouseMarker {
     {
         view.last_input_source = Some(InputSource::Mouse);
         view.set_key_receiver_state(InputReceiver::MouseButton(button), state);
-        view.set_axis_value(
-            InputReceiver::MouseButton(button),
-            match state {
-                PressState::Pressed { .. } => {
-                    view.get_receiver_default_axis_value(InputReceiver::MouseButton(button))
-                }
-                PressState::Released => 0.,
-            },
-            state,
-        );
     }
 }
 

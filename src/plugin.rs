@@ -66,36 +66,21 @@ where
 
 /// Tick every input system to update the press state for the current time, letting the input view know the press
 /// state for the action.
+#[doc(hidden)]
 fn tick_system<Keys>(mut query: Query<&mut InputView<Keys>>)
 where
     Keys: BindingTypeView,
 {
-    #[inline]
-    fn update_time</*T,*/ F>(state: &PressState, exec: F)
-    where
-        //T: BindingTypeView,
-        F: FnOnce(),
-    {
-        if let PressState::Pressed {
-            started_pressing_instant,
-        } = state
-        {
-            if started_pressing_instant.is_none() {
-                exec();
-            }
-        }
-    }
     for mut view in query.iter_mut() {
-        for (rcv, state) in view.receiver_states.clone().iter() {
-            update_time(&state.press, || {
-                view.set_axis_value(
-                    *rcv,
-                    state.value,
-                    PressState::Pressed {
-                        started_pressing_instant: Some(Instant::now()),
-                    },
-                )
-            });
+        for ReceiverDescriptor { axis, .. } in view.descriptors.iter_mut() {
+            if let PressState::Pressed {
+                ref mut started_pressing_instant,
+            } = axis.press
+            {
+                if started_pressing_instant.is_none() {
+                    *started_pressing_instant = Some(Instant::now());
+                }
+            }
         }
     }
 }

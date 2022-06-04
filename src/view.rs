@@ -1,6 +1,6 @@
 //! A view is a object where all input states are stored. It also has useful methods such checking
 //! if a key or axis for a [`BindingTypeView`] is pressed or released by proving the [`PressState`].
-use std::collections::HashMap;
+use std::{collections::HashMap};
 
 use bevy::{prelude::Component, utils::hashbrown::HashSet};
 
@@ -32,8 +32,6 @@ impl InputSource {
     }
 }
 
-pub type BindingInputReceiver = InputReceiver;
-
 /// The current axis state. In other words, the strength (how much the axis is moved) and press state.
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub struct AxisState {
@@ -50,6 +48,29 @@ impl AxisState {
     pub fn new(value: f32, press: PressState) -> Self {
         Self { value, press }
     }
+
+    pub fn set(&mut self, value: f32, press: PressState) {
+        self.value = value;
+        self.press = press;
+    }
+}
+
+/// A holder for input states and its default value.
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct ReceiverDescriptor {
+    pub axis: AxisState,
+    pub default_axis_value: f32,
+    pub input: InputReceiver,
+}
+
+impl ReceiverDescriptor {
+    pub fn new(input: InputReceiver, default_axis_value: f32) -> Self {
+        Self {
+            axis: AxisState::ZERO,
+            default_axis_value,
+            input,
+        }
+    }
 }
 
 /// A view is a object where all input states are stored. It also has useful methods such checking
@@ -61,77 +82,110 @@ where
 {
     pub last_input_source: Option<InputSource>,
     pub bindings: HashMap<Keys, ActionBinding<Keys>>,
-    pub receiver_states: HashMap<InputReceiver, AxisState>,
-    pub receiver_default_axis_values: HashMap<InputReceiver, f32>,
+    pub descriptors: Vec<ReceiverDescriptor>,
+    capacity: u32,
 }
 
 impl<Keys> InputView<Keys>
 where
     Keys: BindingTypeView,
 {
-    /// Create an empty input view.
+    /// Creates an empty input view with a default of 16 capacity.
     pub fn new() -> Self {
+        Self::with_capacity(16)
+    }
+
+    /// Creates an empty input view with a specific capacity.
+    pub fn with_capacity(capacity: u32) -> Self {
         Self {
             last_input_source: None,
             bindings: HashMap::new(),
-            receiver_states: HashMap::new(),
-            receiver_default_axis_values: HashMap::new(),
+            descriptors: Vec::with_capacity(capacity.try_into().unwrap()),
+            capacity,
+        }
+    }
+
+    /// Returns the current capcity of the input view.
+    pub fn capacity(&self) -> u32 {
+        self.capacity
+    }
+
+    /// Sets a new capacity of the input view.
+    pub fn set_capacity(&mut self, capacity: u32) {
+        self.capacity = capacity;
+        let mut vec = Vec::with_capacity(capacity.try_into().unwrap());
+        for descriptor in self.descriptors.iter() {
+            if descriptor.default_axis_value == 0. && descriptor.axis.press.released() {
+                continue;
+            }
+            vec.push(*descriptor);
+        }
+        self.descriptors = vec;
+    }
+
+    /// Add a new binding to the input view.
+    pub fn add_descriptor(&mut self, descriptor: ReceiverDescriptor) {
+        if self.descriptors.len() >= self.capacity.try_into().unwrap() {
+            return;
+        }
+        self.descriptors.push(descriptor);
+    }
+
+    /// Get an existing descriptor.
+    pub fn descriptor(&self, rcv: &InputReceiver) -> Option<&ReceiverDescriptor> {
+        self.descriptors.iter().find(|dsc| dsc.input == *rcv)
+    }
+
+    /// Get an existing descriptor mutably.
+    pub fn descriptor_mut(&mut self, rcv: &InputReceiver) -> Option<&mut ReceiverDescriptor> {
+        self.descriptors.iter_mut().find(|dsc| dsc.input == *rcv)
+    }
+
+    /// Get a descriptor or insert it if it doesn't exist.
+    pub fn descriptor_or_insert(&mut self, input: InputReceiver) -> &mut ReceiverDescriptor {
+        if let Some(index) = self.descriptors.iter().position(|dsc| dsc.input == input) {
+            &mut self.descriptors[index]
+        } else {
+            let descriptor = ReceiverDescriptor::new(input, 0.);
+            self.descriptors.push(descriptor);
+            self.descriptors.last_mut().unwrap()
         }
     }
 
     /// Insert a new binding into the storage.
-    pub fn add_binding(&mut self, binding: &ActionBinding<Keys>) -> &mut Self {
+    pub fn add_binding(&mut self, binding: &mut ActionBinding<Keys>) -> &mut Self {
         binding.apply_default_axis_to_all_receivers(self);
         self.bindings.insert(binding.key, binding.clone());
         self
     }
 
-    /// Add a default axis value to a receiver.
-    pub fn add_receiver_default_axis_values(
-        &mut self,
-        receiver: InputReceiver,
-        value: f32,
-    ) -> &mut Self {
-        self.receiver_default_axis_values.insert(receiver, value);
-        self
-    }
-
-    /// Returns the default axis value for a receiver, or `1` if not found.
-    pub fn get_receiver_default_axis_value(&self, receiver: InputReceiver) -> f32 {
-        *self
-            .receiver_default_axis_values
-            .get(&receiver)
-            .unwrap_or(&1.)
-    }
-
     /// Set the button state for a specific key receiver.
-    pub fn get_receiver_state(&mut self, key: InputReceiver) -> &AxisState {
-        self.receiver_states.get(&key).unwrap_or(&AxisState::ZERO)
+    pub fn state(&self, key: &InputReceiver) -> &AxisState {
+        self.descriptor(key)
+            .map(|descriptor| &descriptor.axis)
+            .unwrap_or(&AxisState::ZERO)
     }
 
     /// Set the axis state for a specific input receiver.
-    pub fn set_axis_value(
-        &mut self,
-        receiver: InputReceiver,
-        value: f32,
-        element_state: PressState,
-    ) {
-        self.receiver_states
-            .insert(receiver, AxisState::new(value, element_state));
+    pub fn set_axis_value(&mut self, input: InputReceiver, value: f32, element_state: PressState) {
+        self.descriptor_or_insert(input)
+            .axis
+            .set(value, element_state);
     }
 
     /// Set the axis state for a specific input receiver.
-    pub fn set_key_receiver_state(&mut self, receiver: InputReceiver, element_state: PressState) {
-        self.set_axis_value(
-            receiver,
-            self.get_receiver_default_axis_value(receiver),
-            element_state,
-        );
+    pub fn set_key_receiver_state(&mut self, input: InputReceiver, state: PressState) {
+        let descriptor = self.descriptor_or_insert(input);
+        let value = match state {
+            PressState::Pressed { .. } => descriptor.default_axis_value,
+            PressState::Released => 0.0,
+        };
+        descriptor.axis.set(value, state);
     }
 
     /// Return the current press state for a specific binding matching with the given BindingTypeView.
     pub fn key(&self, kind: &Keys) -> PressState {
-        self.axis(kind).first().unwrap_or(&AxisState::ZERO).press
+        self.axis(kind).last().unwrap_or(&AxisState::ZERO).press
     }
 
     /// Return the current axis state for a specific binding matching with the given BindingTypeView.
@@ -139,19 +193,19 @@ where
         let binding = self.bindings.get(kind);
         if let Some(binding) = binding {
             'initial: for r in binding.input_receivers.iter() {
-                let states: Vec<AxisState> =
-                    r.0.iter()
-                        .map(|x| *self.receiver_states.get(x).unwrap_or(&AxisState::ZERO))
-                        .collect();
-                if states.is_empty() {
+                if r.0.is_empty() {
                     continue 'initial;
                 }
-                for state in states.iter() {
+                let states = r.0.iter();
+                let mut output = Vec::with_capacity(states.len());
+                for rcv in states {
+                    let state = self.state(rcv);
                     if state.press.released() {
                         continue 'initial;
                     }
+                    output.push(*state);
                 }
-                return states;
+                return output;
             }
         }
         Vec::new()
@@ -177,7 +231,16 @@ where
                 .default_axis_value
                 .retain(|k, _| k.source() != source);
         }
-        self.receiver_default_axis_values
-            .retain(|k, _| k.source() != source);
+        self.descriptors.retain(|dsc| {
+            dsc.default_axis_value != 0.
+                && dsc.axis.press.released()
+                && dsc.input.source() != source
+        });
+    }
+
+    // Remove all irrelevant descriptors.
+    pub fn cleanup(&mut self) {
+        self.descriptors
+            .retain(|dsc| dsc.default_axis_value != 0. || dsc.axis.press.pressed());
     }
 }

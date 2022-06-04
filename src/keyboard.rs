@@ -21,13 +21,6 @@ impl KeyboardMarker {
     {
         view.last_input_source = Some(InputSource::Keyboard);
         view.set_key_receiver_state(InputReceiver::KeyboardKey(key), state);
-        let value = match state {
-            PressState::Pressed { .. } => {
-                view.get_receiver_default_axis_value(InputReceiver::KeyboardKey(key))
-            }
-            PressState::Released => 0.,
-        };
-        view.set_axis_value(InputReceiver::KeyboardKey(key), value, state);
     }
 }
 
