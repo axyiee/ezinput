@@ -12,7 +12,7 @@ pub struct GamepadMarker(pub Gamepad);
 
 impl Default for GamepadMarker {
     fn default() -> Self {
-        Self(Gamepad(0))
+        Self(Gamepad::new(0))
     }
 }
 
