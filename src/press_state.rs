@@ -3,7 +3,7 @@ use std::fmt::{Debug, Display};
 #[allow(unused_imports)]
 use std::ops::Add;
 
-use bevy::input::ButtonState;
+use bevy::input::ElementState as ButtonState;
 use bevy::utils::{Duration, Instant};
 
 /// The current state of a specific axis or button. By default, calls return [`PressState::Released`].
@@ -49,7 +49,7 @@ impl PressState {
         } = *self
         {
             if let Some(instant) = started_pressing_instant {
-                instant.elapsed().as_millis() <= 75
+                instant.elapsed().as_millis() <= 1
             } else {
                 true
             }
