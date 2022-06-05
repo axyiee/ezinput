@@ -24,4 +24,10 @@ impl<Keys: BindingTypeView> InputHandlingBundle<Keys> {
             gamepad_input: GamepadMarker::default(),
         }
     }
+    pub fn with_deadzone(input: InputView<Keys>, dead_zone: (f32, f32)) -> Self {
+        Self {
+            gamepad_input: GamepadMarker::with_dead_zone(0, dead_zone),
+            ..Self::new(input)
+        }
+    }
 }

@@ -2,7 +2,7 @@
 //! if a key or axis for a [`BindingTypeView`] is pressed or released by proving the [`PressState`].
 use std::{collections::HashMap};
 
-use bevy::{prelude::Component, utils::hashbrown::HashSet, math::Vec2};
+use bevy::{prelude::Component, utils::hashbrown::HashSet};
 
 use crate::prelude::*;
 
