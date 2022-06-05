@@ -22,13 +22,13 @@ impl Default for GamepadMarker {
 impl GamepadMarker {
     pub fn with_id(id: usize) -> Self {
         Self {
-            gamepad: Gamepad::new(id),
+            gamepad: Gamepad(id),
             dead_zone: Vec2::ZERO,
         }
     }
     pub fn with_dead_zone(id: usize, dead_zone: (f32, f32)) -> Self {
         Self {
-            gamepad: Gamepad::new(id),
+            gamepad: Gamepad(id),
             dead_zone: Vec2::new(dead_zone.0, dead_zone.1),
         }
     }
@@ -72,10 +72,10 @@ pub(crate) fn gamepad_input_system<Keys>(
     Keys: BindingTypeView,
 {
     for ev in rd.iter() {
-        match ev.event_type {
+        match ev.1 {
             GamepadEventType::ButtonChanged(kind, duration) => {
                 for (mut view, mut svc) in query.iter_mut() {
-                    if ev.gamepad != svc.gamepad {
+                    if ev.0 != svc.gamepad {
                         continue;
                     }
                     let state = if duration.abs() <= 0.1 {
@@ -91,7 +91,7 @@ pub(crate) fn gamepad_input_system<Keys>(
             }
             GamepadEventType::AxisChanged(kind, value) => {
                 for (mut view, mut svc) in query.iter_mut() {
-                    if ev.gamepad != svc.gamepad {
+                    if ev.0 != svc.gamepad {
                         continue;
                     }
                     let state = if value.abs() <= 0.1 {

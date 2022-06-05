@@ -21,7 +21,7 @@ name = "ezinput"
 path = "src/lib.rs"
 
 [dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy", features = ["serialize", "render", "x11", "bevy_gilrs"], default-features = false }
+bevy = { version = "^0.7", features = ["serialize", "render", "x11", "bevy_gilrs"], default-features = false }
 serde = { version = "^1", features = ["derive"] }
 ezinput_macros = { path = "./macros", version = "^0.2" }
 
