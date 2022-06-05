@@ -49,7 +49,7 @@ impl PressState {
         } = *self
         {
             if let Some(instant) = started_pressing_instant {
-                instant.elapsed().as_millis() <= 75
+                instant.elapsed().as_millis() <= 1
             } else {
                 true
             }
