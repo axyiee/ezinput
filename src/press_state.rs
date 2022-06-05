@@ -3,7 +3,7 @@ use std::fmt::{Debug, Display};
 #[allow(unused_imports)]
 use std::ops::Add;
 
-use bevy::input::ElementState as ButtonState;
+use bevy::input::ButtonState;
 use bevy::utils::{Duration, Instant};
 
 /// The current state of a specific axis or button. By default, calls return [`PressState::Released`].
