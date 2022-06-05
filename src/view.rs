@@ -32,29 +32,6 @@ impl InputSource {
     }
 }
 
-/// The current axis state. In other words, the strength (how much the axis is moved) and press state.
-#[derive(PartialEq, Clone, Copy, Debug)]
-pub struct AxisState {
-    pub value: f32,
-    pub press: PressState,
-}
-
-impl AxisState {
-    pub const ZERO: Self = Self {
-        value: 0.0,
-        press: PressState::Released,
-    };
-
-    pub fn new(value: f32, press: PressState) -> Self {
-        Self { value, press }
-    }
-
-    pub fn set(&mut self, value: f32, press: PressState) {
-        self.value = value;
-        self.press = press;
-    }
-}
-
 /// A holder for input states and its default value.
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct ReceiverDescriptor {
@@ -243,9 +220,12 @@ where
         });
     }
 
-    // Remove all irrelevant descriptors.
-    pub fn cleanup(&mut self) {
-        self.descriptors
-            .retain(|dsc| dsc.default_axis_value != 0. || dsc.axis.press.pressed());
+    /// Combine the axis states of all given keys into a [`Vec`].
+    pub fn combine<const T: usize>(&self, array: &[&Keys; T]) -> Vec<AxisState> {
+        let mut output = Vec::with_capacity(T);
+        for key in array {
+            output.extend(self.axis(key));
+        }
+        output
     }
 }
