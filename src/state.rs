@@ -2,6 +2,7 @@
 use std::fmt::{Debug, Display};
 #[allow(unused_imports)]
 use std::ops::Add;
+use std::slice::Iter;
 
 use bevy::input::ButtonState;
 use bevy::utils::{Duration, Instant};
@@ -147,4 +148,63 @@ fn partial_ord_press_state_test() {
     };
     let value = a.cmp(&b);
     assert_eq!(value, std::cmp::Ordering::Less);
+}
+
+/// The current axis state. In other words, the strength (how much the axis is moved) and press state.
+#[derive(PartialEq, Clone, Copy, Debug)]
+pub struct AxisState {
+    pub value: f32,
+    pub press: PressState,
+}
+
+impl AxisState {
+    pub const ZERO: Self = Self {
+        value: 0.0,
+        press: PressState::Released,
+    };
+
+    pub fn new(value: f32, press: PressState) -> Self {
+        Self { value, press }
+    }
+
+    pub fn set(&mut self, value: f32, press: PressState) {
+        self.value = value;
+        self.press = press;
+    }
+}
+
+pub trait AxisStateVecExt {
+    fn is_all_pressed(&mut self) -> bool;
+    
+    fn is_all_just_pressed(&mut self) -> bool;
+
+    fn is_all_released(&mut self) -> bool;
+}
+
+impl AxisStateVecExt for Vec<AxisState> {
+    fn is_all_pressed(&mut self) -> bool {
+        self.iter().all(|s| s.press.pressed())
+    }
+
+    fn is_all_just_pressed(&mut self) -> bool {
+        self.iter().all(|s| s.press.just_pressed())
+    }
+
+    fn is_all_released(&mut self) -> bool {
+        self.iter().all(|s| s.press.released())
+    }
+}
+
+impl AxisStateVecExt for Iter<'_, AxisState> {
+    fn is_all_pressed(&mut self) -> bool {
+        self.all(|s| s.press.pressed())
+    }
+
+    fn is_all_just_pressed(&mut self) -> bool {
+        self.all(|s| s.press.just_pressed())
+    }
+
+    fn is_all_released(&mut self) -> bool {
+        self.all(|s| s.press.released())
+    }
 }
