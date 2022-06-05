@@ -41,7 +41,6 @@ or here on GitHub!
 
 ### Limitations
 
-* Mouse wheel support is not implemented yet.
 * Touch support is not implemented yet.
 * Input receivers are limited to implemented input sources only.
 * Input sources are a hard-coded enumeration (it might not be that bad in most cases though).

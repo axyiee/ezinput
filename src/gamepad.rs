@@ -7,12 +7,30 @@ use crate::prelude::*;
 pub struct GamepadInputHandlingSystem;
 
 // Marker responsible for allowing systems to listen to gamepad input.
-#[derive(PartialEq, Eq, Debug, Component, Clone)]
-pub struct GamepadMarker(pub Gamepad);
+#[derive(PartialEq, Debug, Component, Clone)]
+pub struct GamepadMarker {
+    pub gamepad: Gamepad,
+    pub dead_zone: Vec2,
+}
 
 impl Default for GamepadMarker {
     fn default() -> Self {
-        Self(Gamepad(0))
+        Self::with_id(0)
+    }
+}
+
+impl GamepadMarker {
+    pub fn with_id(id: usize) -> Self {
+        Self {
+            gamepad: Gamepad::new(id),
+            dead_zone: Vec2::ZERO,
+        }
+    }
+    pub fn with_dead_zone(id: usize, dead_zone: (f32, f32)) -> Self {
+        Self {
+            gamepad: Gamepad::new(id),
+            dead_zone: Vec2::new(dead_zone.0, dead_zone.1),
+        }
     }
 }
 
@@ -54,10 +72,10 @@ pub(crate) fn gamepad_input_system<Keys>(
     Keys: BindingTypeView,
 {
     for ev in rd.iter() {
-        match ev.1 {
+        match ev.event_type {
             GamepadEventType::ButtonChanged(kind, duration) => {
                 for (mut view, mut svc) in query.iter_mut() {
-                    if ev.0 != svc.0 {
+                    if ev.gamepad != svc.gamepad {
                         continue;
                     }
                     let state = if duration.abs() <= 0.1 {
@@ -73,7 +91,7 @@ pub(crate) fn gamepad_input_system<Keys>(
             }
             GamepadEventType::AxisChanged(kind, value) => {
                 for (mut view, mut svc) in query.iter_mut() {
-                    if ev.0 != svc.0 {
+                    if ev.gamepad != svc.gamepad {
                         continue;
                     }
                     let state = if value.abs() <= 0.1 {
@@ -82,6 +100,19 @@ pub(crate) fn gamepad_input_system<Keys>(
                         PressState::Pressed {
                             started_pressing_instant: None,
                         }
+                    };
+                    if state.pressed()
+                        && match kind {
+                            GamepadAxisType::LeftStickX | GamepadAxisType::RightStickX => {
+                                value.abs() < svc.dead_zone.x
+                            }
+                            GamepadAxisType::LeftStickY | GamepadAxisType::RightStickY => {
+                                value.abs() < svc.dead_zone.y
+                            }
+                            _ => false,
+                        }
+                    {
+                        continue;
                     };
                     svc.set_gamepad_axis_state::<Keys>(view.as_mut(), kind, state, value);
                     break;

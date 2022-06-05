@@ -4,7 +4,7 @@ use std::hash::Hash;
 
 use crate::prelude::*;
 use bevy::{
-    input::mouse::{MouseButtonInput, MouseMotion},
+    input::mouse::{MouseButtonInput, MouseMotion, MouseWheel},
     math::Vec2,
     prelude::{Component, EventReader, MouseButton, Query, SystemLabel},
     window::CursorMoved,
@@ -89,12 +89,22 @@ impl MouseMarker {
             PressState::Released,
         );
         view.set_axis_value(
+            InputReceiver::MouseAxis(MouseAxisType::Wheel),
+            0.,
+            PressState::Released,
+        );
+        view.set_axis_value(
             InputReceiver::MouseAxisDelta(MouseAxisType::X),
             0.,
             PressState::Released,
         );
         view.set_axis_value(
             InputReceiver::MouseAxisDelta(MouseAxisType::Y),
+            0.,
+            PressState::Released,
+        );
+        view.set_axis_value(
+            InputReceiver::MouseAxisDelta(MouseAxisType::Wheel),
             0.,
             PressState::Released,
         );
@@ -115,6 +125,20 @@ impl MouseMarker {
         view.last_input_source = Some(InputSource::Mouse);
         view.set_key_receiver_state(InputReceiver::MouseButton(button), state);
     }
+
+    /// Set the mouse wheel state and set the last input source to Mouse.
+    pub fn set_mouse_wheel_state<Keys>(
+        &mut self,
+        view: &mut InputView<Keys>,
+        y: f32,
+        state: PressState,
+    ) where
+        Keys: BindingTypeView,
+    {
+        view.last_input_source = Some(InputSource::Mouse);
+        view.set_axis_value(InputReceiver::MouseAxis(MouseAxisType::Wheel), y, state);
+        self.does_mouse_wheel_changed_this_tick = true;
+    }
 }
 
 /// Input system responsible for handling mouse input and setting the button state for each updated button and axis.
@@ -123,6 +147,7 @@ pub(crate) fn mouse_input_system<Keys>(
     mut cursor_rd: EventReader<CursorMoved>,
     mut btn_rd: EventReader<MouseButtonInput>,
     mut mtn_rd: EventReader<MouseMotion>,
+    mut wheel_rd: EventReader<MouseWheel>,
 ) where
     Keys: BindingTypeView,
 {
@@ -136,6 +161,16 @@ pub(crate) fn mouse_input_system<Keys>(
         }
         for ev in btn_rd.iter() {
             mouse_svc.set_mouse_button_state(view, ev.button, ev.state.into());
+        }
+        for ev in wheel_rd.iter() {
+            let state = if ev.y > 0. {
+                PressState::Pressed {
+                    started_pressing_instant: None,
+                }
+            } else {
+                PressState::Released    
+            };
+            mouse_svc.set_mouse_wheel_state(view, ev.y, state);
         }
     }
 }
