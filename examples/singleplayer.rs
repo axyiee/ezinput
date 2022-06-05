@@ -7,6 +7,7 @@ input! {
             Jump = [KeyboardKey(KeyCode::Space), GamepadButton(GamepadButtonType::South)],
             Vertical = [KeyboardKey(KeyCode::W), KeyboardKey(KeyCode::S) => -1., GamepadAxis(GamepadAxisType::LeftStickY)],
             Horizontal = [KeyboardKey(KeyCode::A) => -1. /* default axis value */, KeyboardKey(KeyCode::D), GamepadAxis(GamepadAxisType::LeftStickX)],
+            Hello = [MouseAxis(MouseAxisType::Wheel)]
         }
     }
 }
@@ -66,6 +67,11 @@ fn check_input(query: Query<&EnumeratedInputView, With<Player>>) {
         if axis.press != PressState::Released {
             let action = if axis.value < 0. { "Down" } else { "Up" };
             println!("{:?} => {action}: {:?}", view.last_input_source, axis.value);
+        }
+    }
+    if let Some(axis) = view.axis(&Movement(Hello)).first() {
+        if axis.press != PressState::Released {
+            println!("Mouse => Wheel: {:?}", axis.value);
         }
     }
 }
