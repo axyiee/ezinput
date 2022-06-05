@@ -2,7 +2,7 @@
 //! if a key or axis for a [`BindingTypeView`] is pressed or released by proving the [`PressState`].
 use std::{collections::HashMap};
 
-use bevy::{prelude::Component, utils::hashbrown::HashSet};
+use bevy::{prelude::Component, utils::hashbrown::HashSet, math::Vec2};
 
 use crate::prelude::*;
 
@@ -105,12 +105,12 @@ where
         }
     }
 
-    /// Returns the current capcity of the input view.
+    /// Returns the current capcity for this input view.
     pub fn capacity(&self) -> u32 {
         self.capacity
     }
 
-    /// Sets a new capacity of the input view.
+    /// Sets a new capacity for this input view.
     pub fn set_capacity(&mut self, capacity: u32) {
         self.capacity = capacity;
         let mut vec = Vec::with_capacity(capacity.try_into().unwrap());
@@ -177,7 +177,12 @@ where
     pub fn set_key_receiver_state(&mut self, input: InputReceiver, state: PressState) {
         let descriptor = self.descriptor_or_insert(input);
         let value = match state {
-            PressState::Pressed { .. } => descriptor.default_axis_value,
+            PressState::Pressed { .. } => {
+                if descriptor.axis.press.pressed() {
+                   return;
+                }
+                descriptor.default_axis_value
+            },
             PressState::Released => 0.0,
         };
         descriptor.axis.set(value, state);
