@@ -20,6 +20,58 @@ impl From<Vec<InputReceiver>> for InputReceivers {
     }
 }
 
+impl From<InputReceiver> for InputReceivers {
+    fn from(input_receiver: InputReceiver) -> Self {
+        Self(vec![input_receiver])
+    }
+}
+
+impl<const T: usize> From<[InputReceiver; T]> for InputReceivers {
+    fn from(rcv: [InputReceiver; T]) -> Self {
+        Self(rcv.to_vec())
+    }
+}
+
+impl From<(InputReceiver, InputReceiver)> for InputReceivers {
+    fn from(rcv: (InputReceiver, InputReceiver)) -> Self {
+        Self(vec![rcv.0, rcv.1])
+    }
+}
+
+impl From<(InputReceiver, InputReceiver, InputReceiver)> for InputReceivers {
+    fn from(rcv: (InputReceiver, InputReceiver, InputReceiver)) -> Self {
+        Self(vec![rcv.0, rcv.1, rcv.2])
+    }
+}
+
+impl From<(InputReceiver, InputReceiver, InputReceiver, InputReceiver)> for InputReceivers {
+    fn from(rcv: (InputReceiver, InputReceiver, InputReceiver, InputReceiver)) -> Self {
+        Self(vec![rcv.0, rcv.1, rcv.2, rcv.3])
+    }
+}
+
+impl
+    From<(
+        InputReceiver,
+        InputReceiver,
+        InputReceiver,
+        InputReceiver,
+        InputReceiver,
+    )> for InputReceivers
+{
+    fn from(
+        rcv: (
+            InputReceiver,
+            InputReceiver,
+            InputReceiver,
+            InputReceiver,
+            InputReceiver,
+        ),
+    ) -> Self {
+        Self(vec![rcv.0, rcv.1, rcv.2, rcv.3, rcv.4])
+    }
+}
+
 /// The binding itself, and its associated receivers.
 #[derive(PartialEq, Clone, Debug, Deserialize, Serialize, Default)]
 pub struct ActionBinding<InputKey>
@@ -75,17 +127,10 @@ where
         self.key = key;
         self
     }
-
-    /// Add a new input receiver to this action.
-    pub fn receiver(&mut self, receiver: InputReceiver) -> &mut Self {
-        self.input_receivers
-            .insert(InputReceivers::from(vec![receiver]));
-        self
-    }
-
+    
     /// Add a collection of input receivers to this action.
-    pub fn receivers(&mut self, receivers: Vec<InputReceiver>) -> &mut Self {
-        self.input_receivers.insert(InputReceivers::from(receivers));
+    pub fn receivers(&mut self, receivers: InputReceivers) -> &mut Self {
+        self.input_receivers.insert(receivers);
         self
     }
 

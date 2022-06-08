@@ -72,9 +72,11 @@ macro_rules! input {
                     $(
                         let mut binding = ezinput::prelude::ActionBinding::from($name::$category($category_enum::$key));
                         $(
-                            binding.receiver($kind);
+                            binding.receivers(InputReceivers::from($kind.into_receiver_vec()));
                             $(
-                                binding.default_axis_value($kind, $default);
+                                for rcv in $kind.into_receiver_vec() {
+                                    binding.default_axis_value(rcv, $default);
+                                }
                             )?
                         )*
                         input.add_binding(&mut binding);
