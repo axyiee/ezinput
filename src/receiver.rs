@@ -59,3 +59,76 @@ impl Into<InputReceiver> for MouseAxisType {
         InputReceiver::MouseAxis(self)
     }
 }
+
+pub trait IntoReceiverVec {
+    fn into_receiver_vec(&self) -> Vec<InputReceiver>;
+}
+
+impl<T> IntoReceiverVec for T
+where
+    T: Into<InputReceiver> + Clone,
+{
+    fn into_receiver_vec(&self) -> Vec<InputReceiver> {
+        vec![self.clone().into()]
+    }
+}
+
+impl<A, B> IntoReceiverVec for (A, B)
+where
+    A: IntoReceiverVec,
+    B: IntoReceiverVec,
+{
+    fn into_receiver_vec(&self) -> Vec<InputReceiver> {
+        let mut vec = self.0.into_receiver_vec();
+        vec.extend(self.1.into_receiver_vec());
+        vec
+    }
+}
+
+impl<A, B, C> IntoReceiverVec for (A, B, C)
+where
+    A: IntoReceiverVec,
+    B: IntoReceiverVec,
+    C: IntoReceiverVec,
+{
+    fn into_receiver_vec(&self) -> Vec<InputReceiver> {
+        let mut vec = self.0.into_receiver_vec();
+        vec.extend(self.1.into_receiver_vec());
+        vec.extend(self.2.into_receiver_vec());
+        vec
+    }
+}
+
+impl<A, B, C, D> IntoReceiverVec for (A, B, C, D)
+where
+    A: IntoReceiverVec,
+    B: IntoReceiverVec,
+    C: IntoReceiverVec,
+    D: IntoReceiverVec,
+{
+    fn into_receiver_vec(&self) -> Vec<InputReceiver> {
+        let mut vec = self.0.into_receiver_vec();
+        vec.extend(self.1.into_receiver_vec());
+        vec.extend(self.2.into_receiver_vec());
+        vec.extend(self.3.into_receiver_vec());
+        vec
+    }
+}
+
+impl<A, B, C, D, E> IntoReceiverVec for (A, B, C, D, E)
+where
+    A: IntoReceiverVec,
+    B: IntoReceiverVec,
+    C: IntoReceiverVec,
+    D: IntoReceiverVec,
+    E: IntoReceiverVec,
+{
+    fn into_receiver_vec(&self) -> Vec<InputReceiver> {
+        let mut vec = self.0.into_receiver_vec();
+        vec.extend(self.1.into_receiver_vec());
+        vec.extend(self.2.into_receiver_vec());
+        vec.extend(self.3.into_receiver_vec());
+        vec.extend(self.4.into_receiver_vec());
+        vec
+    }
+}

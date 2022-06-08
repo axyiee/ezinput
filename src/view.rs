@@ -60,7 +60,6 @@ where
     pub last_input_source: Option<InputSource>,
     pub bindings: HashMap<Keys, ActionBinding<Keys>>,
     pub descriptors: Vec<ReceiverDescriptor>,
-    capacity: u32,
 }
 
 impl<Keys> InputView<Keys>
@@ -73,24 +72,22 @@ where
     }
 
     /// Creates an empty input view with a specific capacity.
-    pub fn with_capacity(capacity: u32) -> Self {
+    pub fn with_capacity(capacity: usize) -> Self {
         Self {
             last_input_source: None,
             bindings: HashMap::new(),
-            descriptors: Vec::with_capacity(capacity.try_into().unwrap()),
-            capacity,
+            descriptors: Vec::with_capacity(capacity),
         }
     }
 
     /// Returns the current capcity for this input view.
-    pub fn capacity(&self) -> u32 {
-        self.capacity
+    pub fn capacity(&self) -> usize {
+        self.descriptors.capacity()
     }
 
     /// Sets a new capacity for this input view.
-    pub fn set_capacity(&mut self, capacity: u32) {
-        self.capacity = capacity;
-        let mut vec = Vec::with_capacity(capacity.try_into().unwrap());
+    pub fn set_capacity(&mut self, capacity: usize) {
+        let mut vec = Vec::with_capacity(capacity);
         for descriptor in self.descriptors.iter() {
             if descriptor.default_axis_value == 0. && descriptor.axis.press.released() {
                 continue;
@@ -102,8 +99,8 @@ where
 
     /// Add a new binding to the input view.
     pub fn add_descriptor(&mut self, descriptor: ReceiverDescriptor) {
-        if self.descriptors.len() >= self.capacity.try_into().unwrap() {
-            return;
+        if self.descriptors.len() >= self.capacity() {
+            self.cleanup();
         }
         self.descriptors.push(descriptor);
     }
@@ -124,7 +121,7 @@ where
             &mut self.descriptors[index]
         } else {
             let descriptor = ReceiverDescriptor::new(input, 0.);
-            self.descriptors.push(descriptor);
+            self.add_descriptor(descriptor);
             self.descriptors.last_mut().unwrap()
         }
     }
@@ -213,11 +210,7 @@ where
                 .default_axis_value
                 .retain(|k, _| k.source() != source);
         }
-        self.descriptors.retain(|dsc| {
-            dsc.default_axis_value != 0.
-                && dsc.axis.press.released()
-                && dsc.input.source() != source
-        });
+        self.descriptors.retain(|dsc| dsc.input.source() != source );
     }
 
     /// Combine the axis states of all given keys into a [`Vec`].
@@ -227,5 +220,19 @@ where
             output.extend(self.axis(key));
         }
         output
+    }
+
+    /// Combine the first axis states of all given keys into a [`Vec`].
+    pub fn combine_first<const T: usize>(&self, array: &[&Keys; T]) -> Vec<Option<AxisState>> {
+        let mut output = Vec::with_capacity(T);
+        for key in array {
+            output.push(self.axis(key).first().map(|x| *x));
+        }
+        output
+    }
+
+    /// Remove all irrelevant descriptors to be with accordance with the descriptor vector capacity.
+    pub fn cleanup(&mut self) {
+        self.descriptors.retain(|dsc| dsc.default_axis_value != 0. || dsc.axis.press.pressed());
     }
 }

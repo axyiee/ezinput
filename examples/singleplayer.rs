@@ -1,13 +1,15 @@
 use bevy::prelude::{App, Bundle, Commands, Component, DefaultPlugins, Query, With};
-use ezinput::prelude::{InputReceiver::*, *};
+use ezinput::prelude::*;
 
 input! {
     EnumeratedBinding {
         Movement<EnumeratedMovementBinding> {
-            Jump = [KeyboardKey(KeyCode::Space), GamepadButton(GamepadButtonType::South)],
-            Vertical = [KeyboardKey(KeyCode::W), KeyboardKey(KeyCode::S) => -1., GamepadAxis(GamepadAxisType::LeftStickY)],
-            Horizontal = [KeyboardKey(KeyCode::A) => -1. /* default axis value */, KeyboardKey(KeyCode::D), GamepadAxis(GamepadAxisType::LeftStickX)],
-            Hello = [MouseAxis(MouseAxisType::Wheel)]
+            Jump = [KeyCode::Space, GamepadButtonType::South],
+            Vertical = [KeyCode::W, KeyCode::S => -1., GamepadAxisType::LeftStickY],
+            Horizontal = [KeyCode::A => -1. /* default axis value */, KeyCode::D, GamepadAxisType::LeftStickX],
+            Hello = [MouseAxisType::Wheel],
+            Hi = [(MouseAxisType::X, MouseAxisDelta(MouseAxisType::X))],
+            Combination = [(KeyCode::E, MouseButton::Left)]
         }
     }
 }
@@ -58,20 +60,37 @@ fn check_input(query: Query<&EnumeratedInputView, With<Player>>) {
     }
 
     if let Some(axis) = view.axis(&Movement(Horizontal)).first() {
-        if axis.press != PressState::Released {
+        if axis.pressed() {
             let action = if axis.value < 0. { "Left" } else { "Right" };
             println!("{:?} => {action}: {:?}", view.last_input_source, axis.value);
         }
     }
     if let Some(axis) = view.axis(&Movement(Vertical)).first() {
-        if axis.press != PressState::Released {
+        if axis.pressed() {
             let action = if axis.value < 0. { "Down" } else { "Up" };
             println!("{:?} => {action}: {:?}", view.last_input_source, axis.value);
         }
     }
     if let Some(axis) = view.axis(&Movement(Hello)).first() {
-        if axis.press != PressState::Released {
+        if axis.pressed() {
             println!("Mouse => Wheel: {:?}", axis.value);
+        }
+    }
+
+    // In this next examples we gonna use [`itertools::Itertools`] because it is a great crate
+    // and it matches perfectly our use-case.
+    use itertools::Itertools;
+
+    if let Some(keys) = view.axis(&Movement(Combination)).iter().collect_tuple() {
+        let (e, left) = keys;
+        if keys.pressed() {
+            println!("Keyboard/Mouse => Mouse Left Button: {}, E: {}", left.press, e.press);
+        }
+    }
+
+    if let Some((x, delta)) = view.axis(&Movement(Hi)).iter().collect_tuple() {
+        if x.pressed() {
+            println!("Mouse => X: {:?} (Δ of {:?})", x.value, delta.value);
         }
     }
 }

@@ -1,8 +1,8 @@
 //! The press state for a button or axis. Also useful methods for checking the elapsed time.
 use std::fmt::{Debug, Display};
+
 #[allow(unused_imports)]
 use std::ops::Add;
-use std::slice::Iter;
 
 use bevy::input::ElementState as ButtonState;
 use bevy::utils::{Duration, Instant};
@@ -21,16 +21,32 @@ pub enum PressState {
     /// The button or axis is released.
     Released,
 }
-impl PressState {
+
+pub trait PressStateExt {
     /// Returns whether if the current press state is released or not.
+    fn released(&self) -> bool;
+
+    /// Returns whether if the current press state is pressed for more than a specific duration.
+    fn is_pressed_for(&self, duration: Duration) -> bool;
+
+    /// Returns whether the button or axis was just pressed or moved in this exact tick or not.
+    fn just_pressed(&self) -> bool;
+
+    /// Returns whether the button or axis is currently pressed or moving.
+    fn pressed(&self) -> bool;
+
+    /// Returns the elapsed time since the action was pressed.
+    fn elapsed(&self) -> Option<Duration>;
+}
+
+impl PressStateExt for PressState {
     #[inline]
-    pub fn released(&self) -> bool {
+    fn released(&self) -> bool {
         *self == PressState::Released
     }
 
-    /// Returns whether if the current press state is pressed for more than a specific duration.
     #[inline]
-    pub fn is_pressed_for(&self, duration: Duration) -> bool {
+    fn is_pressed_for(&self, duration: Duration) -> bool {
         if let PressState::Pressed {
             started_pressing_instant,
         } = *self
@@ -42,9 +58,8 @@ impl PressState {
         }
     }
 
-    /// Returns whether the button or axis was just pressed or moved in this exact tick or not.
     #[inline]
-    pub fn just_pressed(&self) -> bool {
+    fn just_pressed(&self) -> bool {
         if let PressState::Pressed {
             started_pressing_instant,
         } = *self
@@ -59,15 +74,13 @@ impl PressState {
         }
     }
 
-    /// Returns whether the button or axis is currently pressed or moving.
     #[inline]
-    pub fn pressed(&self) -> bool {
+    fn pressed(&self) -> bool {
         matches!(*self, PressState::Pressed { .. })
     }
 
-    /// Returns the elapsed time since the action was pressed.
     #[inline]
-    pub fn elapsed(&self) -> Option<Duration> {
+    fn elapsed(&self) -> Option<Duration> {
         match self {
             PressState::Pressed {
                 started_pressing_instant,
@@ -173,38 +186,231 @@ impl AxisState {
     }
 }
 
-pub trait AxisStateVecExt {
-    fn is_all_pressed(&mut self) -> bool;
-    
-    fn is_all_just_pressed(&mut self) -> bool;
+impl PressStateExt for AxisState {
+    #[inline]
+    fn released(&self) -> bool {
+        self.press.released()
+    }
 
-    fn is_all_released(&mut self) -> bool;
+    #[inline]
+    fn is_pressed_for(&self, duration: Duration) -> bool {
+        self.press.is_pressed_for(duration)
+    }
+
+    #[inline]
+    fn just_pressed(&self) -> bool {
+        self.press.just_pressed()
+    }
+
+    #[inline]
+    fn pressed(&self) -> bool {
+        self.press.pressed()
+    }
+
+    #[inline]
+    fn elapsed(&self) -> Option<Duration> {
+        self.press.elapsed()
+    }
+}
+
+pub trait AxisStateVecExt {
+    fn pressed(&self) -> bool;
+
+    fn just_pressed(&self) -> bool;
+
+    fn released(&self) -> bool;
 }
 
 impl AxisStateVecExt for Vec<AxisState> {
-    fn is_all_pressed(&mut self) -> bool {
+    fn pressed(&self) -> bool {
         self.iter().all(|s| s.press.pressed())
     }
 
-    fn is_all_just_pressed(&mut self) -> bool {
+    fn just_pressed(&self) -> bool {
         self.iter().all(|s| s.press.just_pressed())
     }
 
-    fn is_all_released(&mut self) -> bool {
+    fn released(&self) -> bool {
         self.iter().all(|s| s.press.released())
     }
 }
 
-impl AxisStateVecExt for Iter<'_, AxisState> {
-    fn is_all_pressed(&mut self) -> bool {
-        self.all(|s| s.press.pressed())
+impl AxisStateVecExt for (&PressState, &PressState) {
+    #[inline]
+    fn pressed(&self) -> bool {
+        self.0.pressed() && self.1.pressed()
     }
 
-    fn is_all_just_pressed(&mut self) -> bool {
-        self.all(|s| s.press.just_pressed())
+    #[inline]
+    fn just_pressed(&self) -> bool {
+        self.0.just_pressed() && self.1.just_pressed()
     }
 
-    fn is_all_released(&mut self) -> bool {
-        self.all(|s| s.press.released())
+    #[inline]
+    fn released(&self) -> bool {
+        self.0.released() && self.1.released()
+    }
+}
+
+impl AxisStateVecExt for (&PressState, &PressState, &PressState) {
+    #[inline]
+    fn pressed(&self) -> bool {
+        self.0.pressed() && self.1.pressed() && self.2.pressed()
+    }
+
+    #[inline]
+    fn just_pressed(&self) -> bool {
+        self.0.just_pressed() && self.1.just_pressed() && self.2.just_pressed()
+    }
+
+    #[inline]
+    fn released(&self) -> bool {
+        self.0.released() && self.1.released() && self.2.released()
+    }
+}
+
+impl AxisStateVecExt for (&PressState, &PressState, &PressState, &PressState) {
+    #[inline]
+    fn pressed(&self) -> bool {
+        self.0.pressed() && self.1.pressed() && self.2.pressed() && self.3.pressed()
+    }
+
+    #[inline]
+    fn just_pressed(&self) -> bool {
+        self.0.just_pressed()
+            && self.1.just_pressed()
+            && self.2.just_pressed()
+            && self.3.just_pressed()
+    }
+
+    #[inline]
+    fn released(&self) -> bool {
+        self.0.released() && self.1.released() && self.2.released() && self.3.released()
+    }
+}
+
+impl AxisStateVecExt
+    for (
+        &PressState,
+        &PressState,
+        &PressState,
+        &PressState,
+        &PressState,
+    )
+{
+    #[inline]
+    fn pressed(&self) -> bool {
+        self.0.pressed()
+            && self.1.pressed()
+            && self.2.pressed()
+            && self.3.pressed()
+            && self.4.pressed()
+    }
+
+    #[inline]
+    fn just_pressed(&self) -> bool {
+        self.0.just_pressed()
+            && self.1.just_pressed()
+            && self.2.just_pressed()
+            && self.3.just_pressed()
+            && self.4.just_pressed()
+    }
+
+    #[inline]
+    fn released(&self) -> bool {
+        self.0.released()
+            && self.1.released()
+            && self.2.released()
+            && self.3.released()
+            && self.4.released()
+    }
+}
+
+impl AxisStateVecExt for (&AxisState, &AxisState) {
+    #[inline]
+    fn pressed(&self) -> bool {
+        self.0.press.pressed() && self.1.press.pressed()
+    }
+
+    #[inline]
+    fn just_pressed(&self) -> bool {
+        self.0.press.just_pressed() && self.1.press.just_pressed()
+    }
+
+    #[inline]
+    fn released(&self) -> bool {
+        self.0.press.released() && self.1.press.released()
+    }
+}
+
+impl AxisStateVecExt for (&AxisState, &AxisState, &AxisState) {
+    #[inline]
+    fn pressed(&self) -> bool {
+        self.0.press.pressed() && self.1.press.pressed() && self.2.press.pressed()
+    }
+
+    #[inline]
+    fn just_pressed(&self) -> bool {
+        self.0.press.just_pressed() && self.1.press.just_pressed() && self.2.press.just_pressed()
+    }
+
+    #[inline]
+    fn released(&self) -> bool {
+        self.0.press.released() && self.1.press.released() && self.2.press.released()
+    }
+}
+
+impl AxisStateVecExt for (&AxisState, &AxisState, &AxisState, &AxisState) {
+    #[inline]
+    fn pressed(&self) -> bool {
+        self.0.press.pressed()
+            && self.1.press.pressed()
+            && self.2.press.pressed()
+            && self.3.press.pressed()
+    }
+
+    #[inline]
+    fn just_pressed(&self) -> bool {
+        self.0.press.just_pressed()
+            && self.1.press.just_pressed()
+            && self.2.press.just_pressed()
+            && self.3.press.just_pressed()
+    }
+
+    #[inline]
+    fn released(&self) -> bool {
+        self.0.press.released()
+            && self.1.press.released()
+            && self.2.press.released()
+            && self.3.press.released()
+    }
+}
+
+impl AxisStateVecExt for (&AxisState, &AxisState, &AxisState, &AxisState, &AxisState) {
+    #[inline]
+    fn pressed(&self) -> bool {
+        self.0.press.pressed()
+            && self.1.press.pressed()
+            && self.2.press.pressed()
+            && self.3.press.pressed()
+            && self.4.press.pressed()
+    }
+
+    #[inline]
+    fn just_pressed(&self) -> bool {
+        self.0.press.just_pressed()
+            && self.1.press.just_pressed()
+            && self.2.press.just_pressed()
+            && self.3.press.just_pressed()
+            && self.4.press.just_pressed()
+    }
+
+    #[inline]
+    fn released(&self) -> bool {
+        self.0.press.released()
+            && self.1.press.released()
+            && self.2.press.released()
+            && self.3.press.released()
+            && self.4.press.released()
     }
 }
